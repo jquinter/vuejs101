@@ -1,39 +1,24 @@
-<template>
-  <v-card
-    class="mx-auto"
-    max-width="344"
-    elevation="12"
-    :raised="true"
-    :ripple="true"
-  >
-    <v-card-title>
-      {{role.title}}
-    </v-card-title>
-    <v-card-text>
-      <p>{{role.name}}</p>
-      <div class="text--primary">
-        {{role.description}}
-      </div>
-    </v-card-text>
-    <v-card-actions>
-      <v-expansion-panels>
-        <v-expansion-panel>
-          <v-expansion-panel-header>
-            <v-btn
-              text
-            >
-              <span>{{role.includedPermissions.length}} permisos</span>
-            </v-btn>
-          </v-expansion-panel-header>
-          <v-expansion-panel-content>
-            <p v-for="(perm, iperm) in role.includedPermissions" :key="iperm">
-              <span v-html="$options.filters.highlightRegExp(perm,query)"/>
-            </p>
-          </v-expansion-panel-content>
-        </v-expansion-panel>
-      </v-expansion-panels>
-    </v-card-actions>
-  </v-card>
+<template lang='pug'>
+v-card.mx-auto(max-width='344', elevation='12', :raised='true', :ripple='true')
+  v-card-title.word-wrapped
+    | {{role.title}}
+  v-card-subtitle
+    | {{role.name}}
+  v-card-actions
+    v-expansion-panels
+      v-expansion-panel
+        v-expansion-panel-header
+          | {{role.description}}
+          v-btn(text='')
+            v-chip
+              span(v-if='(role && role.matchingPermissions)') {{role.matchingPermissions.length}}/
+              span {{role.includedPermissions.length}}
+        v-expansion-panel-content(v-if='role.matchingPermissions')
+          p(v-for='(perm, iperm) in role.matchingPermissions', :key='iperm')
+            span(v-html='$options.filters.highlightRegExp(perm,query)')
+        v-expansion-panel-content(v-else='')
+          p(v-for='(perm, iperm) in role.includedPermissions', :key='iperm')
+            span(v-html='$options.filters.highlightRegExp(perm,query)')
 </template>
 
 <script>
@@ -50,8 +35,8 @@ export default {
       required: true
     },
     query: {
-      type: String,
-      default: ''
+      type: Array,
+      default: () => []
     }
   }
 }
@@ -61,5 +46,11 @@ export default {
 .highlightText {
   background-color: yellow;
   color: black;
+}
+</style>
+
+<style scoped>
+.v-card__text, .v-card__title {
+  word-break: normal; /* maybe !important  */
 }
 </style>
