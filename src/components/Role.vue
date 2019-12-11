@@ -6,9 +6,10 @@
     :raised="true"
     :ripple="true"
   >
+    <v-card-title>
+      {{role.title}}
+    </v-card-title>
     <v-card-text>
-      <div>IAM Role {{index}}</div>
-      <p class="display-1 text--primary">{{role.title}}</p>
       <p>{{role.name}}</p>
       <div class="text--primary">
         {{role.description}}

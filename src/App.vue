@@ -103,19 +103,7 @@ export default {
     debouncedrolefilter: '',
     filteredRoles: [],
     info: null,
-    drawer: {
-      // sets the open status of the drawer
-      open: false,
-      // sets if the drawer is shown above (false) or below (true) the toolbar
-      clipped: false,
-      // sets if the drawer is CSS positioned as 'fixed'
-      fixed: false,
-      // sets if the drawer remains visible all the time (true) or not (false)
-      permanent: false,
-      // sets the drawer to the mini variant, showing only icons, of itself (true)
-      // or showing the full drawer (false)
-      mini: true
-    },
+    drawer: false,
     toolbar: {
       //
       fixed: false,
