@@ -12,7 +12,7 @@ v-card.mx-auto(max-width='344', elevation='12', :raised='true', :ripple='true')
           v-btn(text='')
             v-chip
               span(v-if='(role && role.matchingPermissions)') {{role.matchingPermissions.length}}/
-              span {{role.includedPermissions.length}}
+              span(v-if='(role && role.includedPermissions)') {{role.includedPermissions.length}}
         v-expansion-panel-content(v-if='role.matchingPermissions')
           p(v-for='(perm, iperm) in role.matchingPermissions', :key='iperm')
             span(v-html='$options.filters.highlightRegExp(perm,query)')

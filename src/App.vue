@@ -12,17 +12,30 @@ v-app#inspire
           v-icon mdi-settings
         v-list-item-content
           v-list-item-title Settings
-  v-app-bar(app='', clipped-left='')
+  v-app-bar(app='',
+    clipped-left='',
+    extension-height='0',
+    fixed,
+    overflow
+    )
     v-app-bar-nav-icon(@click.stop='drawer = !drawer')
     v-toolbar-title
       | IAModeler&nbsp;
-      span(v-show="info.length>filteredRoles.length") {{filteredRoles.length}}/
-      span(v-show="info") {{info.length}} roles
+      span(v-if="info && info.length>filteredRoles.length") {{filteredRoles.length}}/
+      span(v-if="info && info.length>0") {{info.length}} roles
+    my-toolbar-progress-bar(:loading='loading', color='lime accent-3', slot='extension')
   v-content
     v-container#input-usage(fluid='')
       v-row
         v-col(cols='12', xs='12', sm='6', md='10')
-          v-combobox(v-model='activeRoleFilters', :items='permissions', chips='', clearable='', label='Filtrar roles', multiple='', prepend-icon='filter_list', solo='')
+          v-combobox(v-model='activeRoleFilters',
+            :items='permissions',
+            chips='',
+            clearable='',
+            label='Filtrar roles',
+            multiple='',
+            prepend-icon='filter_list',
+            solo='')
             template(v-slot:selection='{ attrs, item, select, selected }')
               v-chip(v-bind='attrs', :input-value='selected', close='', @click='select', @click:close='remove(item)')
                 strong {{ item }}
@@ -49,12 +62,13 @@ v-app#inspire
 <script>
 import axios from 'axios'
 // import debounce from './helpers'
+import MyToolbarProgressBar from '@/components/MyToolbarProgressBar.vue'
 import Role from '@/components/Role.vue'
 
 export default {
   name: 'app',
 
-  components: { Role },
+  components: { MyToolbarProgressBar, Role },
 
   props: {
     source: String
@@ -63,6 +77,7 @@ export default {
   data: () => ({
     activeRoleFilters: [],
     permissions: [],
+    loading: false,
     on: null,
     rolefilter: '',
     debouncedrolefilter: '',
@@ -101,18 +116,43 @@ export default {
       error => console.error(error)
     )
     */
+    this.load_start('cargando datos')
     const rolesRaw = await axios.get(dataUrl)
     this.info = Object.freeze(rolesRaw.data.slice())
     this.filteredRoles = this.info
 
     const permissionsRaw = await axios.get('/data/permissions_roles.json')
     this.permissions = Object.freeze(permissionsRaw.data.slice()).map(x => x.permission)
+    this.load_finished('cargando datos')
+  },
+
+  beforeUpdate () {
+    console.log('empieza update')
+    // this.load_start('beforeUpdate')
+    // this.load_start()
+  },
+
+  updated () {
+    console.log('termina update')
+    // this.load_finished('updated')
+    // this.load_finished()
   },
 
   methods: {
+    load_start (msg) {
+      if (msg) {
+        console.log('starting...', msg)
+      }
+      this.loading = true
+    },
+    load_finished (msg) {
+      if (msg) {
+        console.log('done...', msg)
+      }
+      this.loading = false
+    },
     filterRoles () {
       if (this.activeRoleFilters.length > 0) {
-        console.log('Filtrando')
         let matchingRoles = new Set()
         let partialMatching = []
         for (let index = 0; index < this.activeRoleFilters.length; index++) {
@@ -141,18 +181,14 @@ export default {
               var regexp = new RegExp(filteringByRole, 'gi')
               return regexp.test(perm)
             })
-            console.log(currentMatch)
             if (item.name in this.rolesAndMatchingPermissions) {
-              console.log('ya estaba declardo, le hago append')
               this.rolesAndMatchingPermissions[item.name] = [...this.rolesAndMatchingPermissions[item.name], ...currentMatch]
               // deduplicating
               this.rolesAndMatchingPermissions[item.name] = [...new Set(this.rolesAndMatchingPermissions[item.name])]
             } else {
-              console.log('no existia, lo agrego')
               this.rolesAndMatchingPermissions[item.name] = currentMatch
             }
           }
-          console.log('rolesAndMatchingPermissions', this.rolesAndMatchingPermissions)
           partialMatching.forEach(role => matchingRoles.add(role))
         }
         this.filteredRoles = Array.from(matchingRoles)
@@ -177,6 +213,10 @@ export default {
       this.rolesAndMatchingPermissions = {}
       this.filterRoles()
     }
+    // filteredRoles: function (newVal, oldVal) {
+    //   this.load_start('filteredRoles watch')
+    //   this.load_finished('filteredRoles watch')
+    // }
   }
   /*
     rolefilter: debounce(function (newVal) {
@@ -186,3 +226,9 @@ export default {
   */
 }
 </script>
+
+<style>
+.v-toolbar__extension {
+  padding: 0px !important;
+}
+</style>
