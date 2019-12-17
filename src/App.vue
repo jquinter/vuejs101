@@ -156,49 +156,65 @@ export default {
         let matchingRoles = new Set()
         let partialMatching = []
         for (let index = 0; index < this.activeRoleFilters.length; index++) {
+          /* for each role filter */
+
           const filteringByRole = this.activeRoleFilters[index]
 
-          /*
-          Primero: obtener, desde el set completo de roles (info)
-          todos aquellos roles que contienen el permiso que estamos buscando (filteringByRole)
-          */
-          partialMatching = this.info.filter(item => {
-            // return item.name.toLowerCase().indexOf(filtering_by_role.toByRolee()) > -1
-            // console.log(item.name, item.includedPermissions.length, item.includedPermissions.some((element) => (element.toLowerCase().indexOf(filtering_by_role.toByRolee()) > -1)))
-            var regexp = new RegExp(filteringByRole, 'gi')
-            return item && item.includedPermissions && item.includedPermissions.length &&
-              // item.includedPermissions.some((element) => (element.toLowerCase().indexOf(filtering_by_role.toByRolee()) > -1))
-              item.includedPermissions.some((element) => (regexp.test(element)))
-          })
-
-          /*
-          Luego, desde este conjunto intermedio de roles,
-          extraemos los permisos aludidos en la busqueda
-          */
-          for (let index = 0; index < partialMatching.length; index++) {
-            const item = partialMatching[index]
-            var currentMatch = item.includedPermissions.filter(perm => {
+          /* Ampliación de filtro de búsqueda: podemos buscar por calce de codigo de rol */
+          if (filteringByRole.startsWith('roles/')) {
+            partialMatching = this.info.filter(item => {
               var regexp = new RegExp(filteringByRole, 'gi')
-              return regexp.test(perm)
+              return item && item.name && regexp.test(item.name)
             })
-            if (item.name in this.rolesAndMatchingPermissions) {
-              this.rolesAndMatchingPermissions[item.name] = [...this.rolesAndMatchingPermissions[item.name], ...currentMatch]
-              // deduplicating
-              this.rolesAndMatchingPermissions[item.name] = [...new Set(this.rolesAndMatchingPermissions[item.name])]
-            } else {
-              this.rolesAndMatchingPermissions[item.name] = currentMatch
+          } else {
+            /* buscamos permisos puntuales */
+
+            /*
+            Primero: obtener, desde el set completo de roles (info)
+            todos aquellos roles que contienen el permiso que estamos buscando (filteringByRole)
+            */
+            partialMatching = this.info.filter(item => {
+              // return item.name.toLowerCase().indexOf(filtering_by_role.toByRolee()) > -1
+              // console.log(item.name, item.includedPermissions.length, item.includedPermissions.some((element) => (element.toLowerCase().indexOf(filtering_by_role.toByRolee()) > -1)))
+              var regexp = new RegExp(filteringByRole, 'gi')
+              return item && item.includedPermissions && item.includedPermissions.length &&
+                // item.includedPermissions.some((element) => (element.toLowerCase().indexOf(filtering_by_role.toByRolee()) > -1))
+                item.includedPermissions.some((element) => (regexp.test(element)))
+            })
+
+            /*
+            Luego, desde este conjunto intermedio de roles,
+            extraemos los permisos aludidos en la busqueda
+            */
+            for (let index = 0; index < partialMatching.length; index++) {
+              const item = partialMatching[index]
+              var currentMatch = item.includedPermissions.filter(perm => {
+                var regexp = new RegExp(filteringByRole, 'gi')
+                return regexp.test(perm)
+              })
+              if (item.name in this.rolesAndMatchingPermissions) {
+                this.rolesAndMatchingPermissions[item.name] = [...this.rolesAndMatchingPermissions[item.name], ...currentMatch]
+                // deduplicating
+                this.rolesAndMatchingPermissions[item.name] = [...new Set(this.rolesAndMatchingPermissions[item.name])]
+              } else {
+                this.rolesAndMatchingPermissions[item.name] = currentMatch
+              }
             }
           }
+          /*
+          acá mantenemos un set de todos los posibles roles que se han encontrado
+          al usar los filtros de busqueda especificados
+          */
           partialMatching.forEach(role => matchingRoles.add(role))
-        }
-        this.filteredRoles = Array.from(matchingRoles)
-        this.filteredRoles = this.filteredRoles.map(function (item) {
-          var processed = {
-            ...item,
-            matchingPermissions: item.name in this.rolesAndMatchingPermissions ? this.rolesAndMatchingPermissions[item.name] : null
-          }
-          return processed
-        }, this)
+          this.filteredRoles = Array.from(matchingRoles)
+          this.filteredRoles = this.filteredRoles.map(function (item) {
+            var processed = {
+              ...item,
+              matchingPermissions: item.name in this.rolesAndMatchingPermissions ? this.rolesAndMatchingPermissions[item.name] : null
+            }
+            return processed
+          }, this)
+        } /* for each role filter */
       } else {
         this.filteredRoles = this.info
       }
