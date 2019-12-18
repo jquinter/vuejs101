@@ -67,11 +67,11 @@ v-app#inspire
           cols='12',
           xs='12',
           sm='6',
-          md='4')
+          md='3')
           role(:role='item', :index='index+1', :query='activeRoleFilters')
         v-col(v-show='uiIsCompareView')
           template
-            v-data-table.elevation-1(:headers='uiCompareViewHeaders',
+            v-data-table.elevation-1(:headers.sync='uiCompareViewHeaders',
               :items='filteredRoles',
               :page.sync='uiPage',
               :items-per-page.sync='uiItemsPerPage',
@@ -88,19 +88,23 @@ v-app#inspire
                   v-spacer
                   v-switch.mt-2(v-model='uiCompareViewLeastPriviledgePrinciple', label='Least Priviledge Principle')
               template(v-slot:expanded-item='{ headers, item }')
-                v-card
-                  v-card-title
-                    | Permisos incluídos
-                    v-spacer
-                    v-text-field(v-model='uiCompareViewExpandedSearch',
-                      append-icon='search',
-                      label='Filtrar lista de permisos',
-                      single-line='')
-                  v-data-table(
-                    :headers="[{'text': 'Name', 'sortable': 'true', 'value': 'name'}]"
-                    :items="generateData(item.includedPermissions)"
-                    :search='uiCompareViewExpandedSearch'
-                  )
+                td(:colspan='headers.length')
+                  v-card
+                    v-card-title
+                      | Permisos incluídos
+                      v-spacer
+                      v-text-field(v-model='uiCompareViewExpandedSearch',
+                        append-icon='search',
+                        label='Filtrar lista de permisos',
+                        single-line='')
+                    v-data-table(
+                      :headers="[{'text': 'Name', 'sortable': 'true', 'value': 'name'}]"
+                      :items="generateData(item.includedPermissions)"
+                      :search='uiCompareViewExpandedSearch'
+                    )
+                      template(v-slot:body='{ items }')
+                        p(v-for='(perm, iperm) in items', :key='iperm')
+                          span(v-html='$options.filters.highlightRegExp(perm.name,activeRoleFilters)')
 
   v-footer(app='', padless='')
     v-row.mt-2(align='center', justify='center')
