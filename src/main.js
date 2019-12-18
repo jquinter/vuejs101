@@ -1,9 +1,17 @@
 import Vue from 'vue'
-import App from '@/App.vue'
+import VueRouter from 'vue-router'
+import App from '@/App'
 import vuetify from '@/plugins/vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import vueDebounce from 'vue-debounce'
+
+import routes from '@/routes'
+import store from '@/store'
+
+Vue.use(VueRouter)
+
+const router = new VueRouter({ routes })
 
 Vue.config.productionTip = true
 Vue.config.performance = false
@@ -27,5 +35,7 @@ Vue.filter('highlightRegExp', function (words, querySet) {
 
 new Vue({
   vuetify,
+  router,
+  store,
   render: h => h(App)
 }).$mount('#app')

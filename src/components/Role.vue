@@ -1,7 +1,14 @@
 <template lang='pug'>
 v-card.mx-auto(max-width='344', elevation='12', :raised='true', :ripple='true')
   v-card-title.word-wrapped
-    | {{role.title}}
+    div
+      | {{role.title}}
+      v-tooltip(right='', :light='true')
+        template(v-slot:activator='{ on }')
+          v-btn.mx-2(fab='', small='', color='teal', @click='goToRoleDetail(role.name)', v-on='on')
+            v-icon(dark='') mdi-format-list-bulleted-square
+        span Ver detalles de {{role.name}}
+
   v-card-subtitle
     | {{role.name}}
   v-card-actions
@@ -24,6 +31,12 @@ v-card.mx-auto(max-width='344', elevation='12', :raised='true', :ripple='true')
 <script>
 export default {
   name: 'Role',
+
+  methods: {
+    goToRoleDetail (name) {
+      this.$router.push({ name: 'role', params: { name } })
+    }
+  },
 
   props: {
     index: {
