@@ -5,7 +5,7 @@ v-card.mx-auto(max-width='344', elevation='12', :raised='true', :ripple='true')
   v-card-subtitle
     | {{role.name}}
   v-card-actions
-    v-expansion-panels
+    v-expansion-panels(:dark='false', :light='true')
       v-expansion-panel
         v-expansion-panel-header
           | {{role.description}}
@@ -15,10 +15,10 @@ v-card.mx-auto(max-width='344', elevation='12', :raised='true', :ripple='true')
               span(v-if='(role && role.includedPermissions)') {{role.includedPermissions.length}}
         v-expansion-panel-content(v-if='role.matchingPermissions')
           p(v-for='(perm, iperm) in role.matchingPermissions', :key='iperm')
-            span(v-html='$options.filters.highlightRegExp(perm,query)')
+            span.body-2(v-html='$options.filters.highlightRegExp(perm,query)')
         v-expansion-panel-content(v-else='')
           p(v-for='(perm, iperm) in role.includedPermissions', :key='iperm')
-            span(v-html='$options.filters.highlightRegExp(perm,query)')
+            span.body-2(v-html='$options.filters.highlightRegExp(perm,query)')
 </template>
 
 <script>

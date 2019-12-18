@@ -59,7 +59,7 @@ v-app#inspire
                 v-on='on')
                 v-icon(large='') mdi-codepen
             span Codepen
-      v-row(no-gutters='')
+      v-row(dense='')
         v-col(v-show='!uiIsCompareView',
           v-for='(item, index) in filteredRoles',
           :key='index',
@@ -73,12 +73,13 @@ v-app#inspire
           template
             v-data-table.elevation-1(:headers.sync='uiCompareViewHeaders',
               :items='filteredRoles',
+              item-key='name',
               :page.sync='uiPage',
               :items-per-page.sync='uiItemsPerPage',
               :footer-props='uiCompareViewFooterProps',
               :sort-by.sync='uiCompareViewSortBy',
               :sort-desc.sync='uiCompareViewSortDesc',
-              :single-expand='false',
+              :single-expand='uiCompareViewSingleExpand',
               show-expand='',
               :expanded.sync='uiCompareViewExpanded',
               multi-sort='')
@@ -86,7 +87,7 @@ v-app#inspire
                 v-toolbar(flat='')
                   v-toolbar-title(v-if='false') Roles
                   v-spacer
-                  v-switch.mt-2(v-model='uiCompareViewLeastPriviledgePrinciple', label='Least Priviledge Principle')
+                  v-switch.mt-2(v-model='uiCompareViewLeastPriviledgePrinciple', color='lime accent-3', label='Least Priviledge Principle')
               template(v-slot:expanded-item='{ headers, item }')
                 td(:colspan='headers.length')
                   v-card
@@ -98,13 +99,16 @@ v-app#inspire
                         label='Filtrar lista de permisos',
                         single-line='')
                     v-data-table(
-                      :headers="[{'text': 'Name', 'sortable': 'true', 'value': 'name'}]"
+                      :dense='false'
+                      :dark='true'
+                      :headers="[{'text': 'permission name', 'sortable': 'true', 'value': 'name'}]"
                       :items="generateData(item.includedPermissions)"
                       :search='uiCompareViewExpandedSearch'
                     )
                       template(v-slot:body='{ items }')
-                        p(v-for='(perm, iperm) in items', :key='iperm')
-                          span(v-html='$options.filters.highlightRegExp(perm.name,activeRoleFilters)')
+                        tbody
+                          tr(v-for='(perm, iperm) in items', :key='iperm')
+                            td.text-start(v-html='$options.filters.highlightRegExp(perm.name,activeRoleFilters)')
 
   v-footer(app='', padless='')
     v-row.mt-2(align='center', justify='center')
@@ -112,7 +116,7 @@ v-app#inspire
         span.grey--text Items per page
         v-menu(offset-y='')
           template(v-slot:activator='{ on }')
-            v-btn.ml-2(dark='', text='', color='primary', v-on='on')
+            v-btn.ml-2(dark='', text='', color='lime darken-1', v-on='on')
               | {{ uiItemsPerPage }}
               v-icon mdi-chevron-down
           v-list
@@ -127,14 +131,15 @@ v-app#inspire
 
       v-col(align='center', cols='12', md='6')
         v-pagination(v-model='uiPage',
+          color='lime darken-3',
           :length='uiNumberOfPages',
           :total-visible='9')
 
       v-col(align='center', cols='12', md='2')
-        v-btn.mr-1(fab='', dark='', color='blue darken-3', @click='uiFormerPage')
+        v-btn.mr-1(fab='', dark='', color='lime darken-3', @click='uiFormerPage')
           v-icon mdi-chevron-left
 
-        v-btn.ml-1(fab='', dark='', color='blue darken-3', @click='uiNextPage')
+        v-btn.ml-1(fab='', dark='', color='lime darken-3', @click='uiNextPage')
           v-icon mdi-chevron-right
 
       v-col(align='center', cols='12', md='1')
@@ -170,6 +175,7 @@ export default {
       'items-per-page-options': [4, 8, 12, -1]
     },
     uiCompareViewExpanded: [],
+    uiCompareViewSingleExpand: false,
     uiCompareViewExpandedSearch: '',
     uiCompareViewHeaders: [
       {
@@ -459,5 +465,8 @@ export default {
 <style>
 .v-toolbar__extension {
   padding: 0px !important;
+}
+tbody tr:nth-of-type(odd), .v-expansion-panel-content p:nth-of-type(odd) {
+  background-color: rgba(0, 0, 0, .15);
 }
 </style>
