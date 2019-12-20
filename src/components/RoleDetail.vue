@@ -2,8 +2,10 @@
 v-content
   v-container
     v-row
-      v-col(cols='12', xs='12', sm='6', md='5', align='justify')
-        v-card.mx-auto(elevation='12', :raised='true', :ripple='true')
+      v-col(cols='12', xs='12', sm='6', md='5', align='justify', ref='container')
+        v-btn.mx-auto(small='', color='teal', @click='goTo("home")') Volver al listado
+
+        v-card.mx-auto(v-if='role', elevation='12', :raised='true', :ripple='true')
           v-card-title.word-wrapped(@click='goToRoleDetail(role.name)')
             | {{role.title}}
           v-card-subtitle
@@ -17,6 +19,7 @@ v-content
                   label='Filtrar lista de permisos',
                   single-line='')
               v-data-table(
+                v-if='role && role.includedPermissions'
                 :dense='false'
                 :dark='true'
                 :headers="[{'text': 'Permisos incluídos', 'sortable': 'true', 'value': 'name'}]"
@@ -27,16 +30,25 @@ v-content
                   tbody
                     tr(v-for='(perm, iperm) in items', :key='iperm')
                       td.text-start(v-html='perm.name')
+
+      v-col(cols='12', xs='12', sm='6', md='5', align='justify')
+        TreeMap(v-if='role', :treeMapRawData='role.includedPermissions', :containerWidth='containerWidth', :containerHeight='containerHeight')
+
 </template>
 <script>
 import { mapState } from 'vuex'
 import Role from '@/components/Role'
+import TreeMap from '@/components/TreeMap'
 
 export default {
-  components: { Role },
+  name: 'RoleDetail',
+  components: { Role, TreeMap },
 
   data: () => ({
-    uiCompareViewExpandedSearch: ''
+    uiCompareViewExpandedSearch: '',
+    containerHeight: 0,
+    containerWidth: 0,
+    container: {}
   }),
 
   computed: {
@@ -48,13 +60,23 @@ export default {
       })[0]
     }
   },
-
+  mounted () {
+    if (this.$refs.container) {
+      this.containerHeight = this.$refs['container'].clientHeight
+      this.containerWidth = this.$refs['container'].clientWidth - 24
+      console.log(this.$refs['container'].clientWidth)
+    }
+  },
   methods: {
     generateData (arrayData) {
       return arrayData.map(function (item) {
         return { name: item, value: item }
       }, this)
+    },
+    goTo (name) {
+      this.$router.push({ name: name })
     }
   }
+
 }
 </script>

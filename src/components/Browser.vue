@@ -35,7 +35,7 @@ div
                 v-on='on')
                 v-icon(large='') mdi-codepen
             span Codepen
-      v-row(dense='')
+      transition-group.depth(name='gallery', tag='v-row', dense='')
         v-col(v-show='!uiIsCompareView',
           v-for='(item, index) in filteredRoles',
           :key='index',
@@ -45,6 +45,7 @@ div
           sm='6',
           md='3')
           role(:role='item', :index='index+1', :query='activeRoleFilters')
+      v-row(dense='')
         v-col(v-show='uiIsCompareView')
           template
             v-data-table.elevation-1(:headers.sync='uiCompareViewHeaders',
@@ -138,7 +139,7 @@ export default {
   data: () => ({
     uiButtonSwitchViewText: 'activar modo comparación',
     uiIsCompareView: false,
-    uiItemsPerPage: 4,
+    uiItemsPerPage: 8,
     uiItemsPerPageArray: [4, 8, 12, -1],
     uiPage: 1,
     uiCompareViewLeastPriviledgePrinciple: false,
@@ -408,4 +409,14 @@ export default {
 </script>
 
 <style>
+.gallery-move {
+  transition: transform 1s;
+}
+.gallery-enter-active, .gallery-leave-active {
+  transition: all 0.4s;
+}
+.gallery-enter, .gallery-leave-to /* .list-leave-active below version 2.1.8 */ {
+  opacity: 0;
+  transform: translateY(30px);
+}
 </style>
