@@ -57,17 +57,6 @@ export default {
 
     var dataUrl = '/data/roles_detailed.json'
 
-    //  .get('https://api.coindesk.com/v1/bpi/currentprice.json')
-    /*
-    axios.get(dataUrl).then(
-      // response => (console.log(JSON.parse(response.data))),
-      response => {
-        this.info = response.data.slice(350, 400)
-        this.filteredRoles = this.info
-      },
-      error => console.error(error)
-    )
-    */
     this.$store.commit('setLoading', true)
     const rolesRaw = await axios.get(dataUrl)
     this.$store.commit('setInfo', Object.freeze(rolesRaw.data.slice()))
