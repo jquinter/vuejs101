@@ -23,6 +23,7 @@ v-app#inspire
       | IAModeler&nbsp;
       span(v-if="info && info.length>filteredRoles.length") {{filteredRoles.length}}/
       span(v-if="info && info.length>0") {{info.length}} roles
+      span(v-if="permissions && permissions.length>0") &nbsp;[{{permissions.length}} permisos]
     my-toolbar-progress-bar(:loading='loading', color='lime accent-3', slot='extension')
   router-view
 </template>
@@ -42,7 +43,7 @@ export default {
   }),
 
   computed: {
-    ...mapState(['loading', 'filteredRoles', 'info', 'permissions'])
+    ...mapState(['loading', 'filteredRoles', 'info', 'permissions', 'roles'])
   },
 
   methods: {
@@ -71,6 +72,7 @@ export default {
     const rolesRaw = await axios.get(dataUrl)
     this.$store.commit('setInfo', Object.freeze(rolesRaw.data.slice()))
     this.$store.commit('setFilteredRoles', Object.freeze(rolesRaw.data.slice()))
+    this.$store.commit('setRoles', Object.freeze(rolesRaw.data.slice()).map(x => x.name))
 
     const permissionsRaw = await axios.get('/data/permissions_roles.json')
     this.$store.commit('setPermissions', Object.freeze(permissionsRaw.data.slice()).map(x => x.permission))

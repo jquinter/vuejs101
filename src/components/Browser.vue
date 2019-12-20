@@ -5,10 +5,10 @@ div
       v-row
         v-col(cols='12', xs='12', sm='6', md='9', align='center')
           v-combobox(v-model='activeRoleFilters',
-            :items='permissions',
+            :items='searchfilter',
             chips='',
             clearable='',
-            label='Filtrar roles',
+            label='Filtrar roles (puede usar regexp y búsquedas parciales)',
             multiple='',
             prepend-icon='filter_list',
             solo='')
@@ -192,7 +192,10 @@ export default {
   }),
 
   computed: {
-    ...mapState(['loading', 'filteredRoles', 'info', 'permissions']),
+    ...mapState(['loading', 'filteredRoles', 'info', 'permissions', 'roles']),
+    searchfilter () {
+      return this.roles.concat(this.permissions)
+    },
     uiNumberOfPages () {
       return Math.ceil(this.filteredRoles.length / this.uiItemsPerPage)
     }

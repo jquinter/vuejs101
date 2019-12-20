@@ -8,7 +8,8 @@ const store = new Vuex.Store({
     loading: false,
     filteredRoles: [],
     info: [],
-    permissions: []
+    permissions: [],
+    roles: []
   },
   mutations: {
     setLoading (state, loading) {
@@ -22,6 +23,9 @@ const store = new Vuex.Store({
     },
     setPermissions (state, permissions) {
       state.permissions = permissions
+    },
+    setRoles (state, roles) {
+      state.roles = roles
     }
   }
 })
