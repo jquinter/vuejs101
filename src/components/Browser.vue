@@ -47,6 +47,16 @@ div
           sm='6',
           md='3')
           role(:role='item', :index='index+1', :query='activeRoleFilters')
+      div.d-sm-none(v-infinite-scroll='loadMore', :infinite-scroll-disabled='uiInfiniteScrollBusy', :infinite-scroll-distance='uiInfiniteScrollLimit')
+        v-col(v-show='!uiIsCompareView',
+          v-for='(item, index) in filteredRoles',
+          v-if='index >= (uiPage-1)*uiItemsPerPage && index < (uiPage)*uiItemsPerPage',
+          :key='index',
+          cols='12',
+          xs='12',
+          sm='6',
+          md='3')
+          role(:role='item', :index='index+1', :query='activeRoleFilters')
       v-row(dense='')
         v-col(v-show='uiIsCompareView')
           template
@@ -141,6 +151,7 @@ export default {
   },
 
   data: () => ({
+    uiInfiniteScrollLimit: 10,
     uiButtonSwitchViewText: 'activar modo comparación',
     uiIsCompareView: false,
     uiItemsPerPage: 8,
@@ -219,6 +230,11 @@ export default {
   },
 
   methods: {
+    loadMore () {
+      this.uiInfiniteScrollBusy = true
+      this.uiPage++
+      this.uiInfiniteScrollBusy = false
+    },
     generateData (arrayData) {
       return arrayData.map(function (item) {
         return { name: item, value: item }
