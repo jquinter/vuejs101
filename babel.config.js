@@ -3,6 +3,6 @@ module.exports = {
     '@vue/cli-plugin-babel/preset'
   ],
   plugins: [
-    ["@babel/plugin-proposal-object-rest-spread", { "loose": true, "useBuiltIns": true }]
+    ['@babel/plugin-proposal-object-rest-spread', { 'loose': true, 'useBuiltIns': true }]
   ]
 }
