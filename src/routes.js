@@ -1,8 +1,9 @@
-import Browser from '@/components/Browser'
-import RoleDetail from '@/components/RoleDetail'
+function lazyLoad (view) {
+  return () => import(`@/components/${view}.vue`)
+}
 
 const routes = [
-  { path: '/', component: Browser, name: 'home' },
-  { path: '/roles/:name', component: RoleDetail, name: 'role' }
+  { path: '/', component: lazyLoad('Browser'), name: 'home' },
+  { path: '/roles/:name', component: lazyLoad('RoleDetail'), name: 'role' }
 ]
 export default routes

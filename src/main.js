@@ -4,7 +4,6 @@ import App from '@/App'
 import vuetify from '@/plugins/vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
-import vueDebounce from 'vue-debounce'
 
 import routes from '@/routes'
 import store from '@/store'
@@ -15,7 +14,6 @@ const router = new VueRouter({ routes })
 
 Vue.config.productionTip = true
 Vue.config.performance = false
-Vue.use(vueDebounce, { lock: true, defaultTime: '400ms', listenTo: 'keyup' })
 
 Vue.filter('highlight', function (words, query) {
   return words.replace(query, '<span class="highlightText">' + query + '</span>')

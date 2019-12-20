@@ -124,13 +124,15 @@ div
 </template>
 
 <script>
-import Role from '@/components/Role'
 import { mapState } from 'vuex'
+function lazyLoad (view) {
+  return () => import(`@/components/${view}.vue`)
+}
 
 export default {
   name: 'app',
 
-  components: { Role },
+  components: { Role: lazyLoad('Role') },
 
   props: {
     source: String

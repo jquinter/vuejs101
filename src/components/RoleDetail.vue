@@ -37,12 +37,13 @@ v-content
 </template>
 <script>
 import { mapState } from 'vuex'
-import Role from '@/components/Role'
-import TreeMap from '@/components/TreeMap'
+function lazyLoad (view) {
+  return () => import(`@/components/${view}.vue`)
+}
 
 export default {
   name: 'RoleDetail',
-  components: { Role, TreeMap },
+  components: { Role: lazyLoad('Role'), TreeMap: lazyLoad('TreeMap') },
 
   data: () => ({
     uiCompareViewExpandedSearch: '',
