@@ -6,12 +6,14 @@ div
         v-col(cols='12', xs='12', sm='6', md='9', align='center')
           v-combobox(v-model='activeRoleFilters',
             :items='searchfilter',
+            hide-no-data,
             chips='',
             clearable='',
-            label='Filtrar roles (puede usar regexp y búsquedas parciales)',
+            label='Filtrar roles',
+            hint='puede usar regexp y búsquedas parciales',
+            persistent-hint='',
             multiple='',
-            prepend-icon='filter_list',
-            solo='')
+            prepend-icon='filter_list')
             template(v-slot:selection='{ attrs, item, select, selected }')
               v-chip(v-bind='attrs', :input-value='selected', close='', @click='select', @click:close='remove(item)')
                 strong {{ item }}
@@ -87,9 +89,9 @@ div
                           tr(v-for='(perm, iperm) in items', :key='iperm')
                             td.text-start(v-html='$options.filters.highlightRegExp(perm.name,activeRoleFilters)')
 
-  v-footer(app='', padless='')
+  v-footer.d-none.d-sm-block(app='', padless='')
     v-row.mt-2(align='center', justify='center')
-      v-col(align='center', cols='12', md='3')
+      v-col.d-none.d-sm-block(align='center', cols='12', md='3')
         span.grey--text Items per page
         v-menu(offset-y='')
           template(v-slot:activator='{ on }')
@@ -106,13 +108,13 @@ div
         span.mr-4.grey--text(v-if='false')
           | Page {{ uiPage }} of {{ uiNumberOfPages }}
 
-      v-col(align='center', cols='12', md='6')
+      v-col.d-none.d-sm-block(align='center', cols='12', md='6')
         v-pagination(v-model='uiPage',
           color='lime darken-3',
           :length='uiNumberOfPages',
           :total-visible='9')
 
-      v-col(align='center', cols='12', md='2')
+      v-col.d-sm-none(align='center', cols='12', md='2')
         v-btn.mr-1(fab='', dark='', color='lime darken-3', @click='uiFormerPage')
           v-icon mdi-chevron-left
 

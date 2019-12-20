@@ -1,5 +1,6 @@
 <template>
   <div class="treemap">
+    <span class="caption"> Este gráfico es interactivo: pincha las zonas para ver detalles jerárquicos</span>
     <!-- The SVG structure is explicitly defined in the template with attributes derived from component data -->
     <svg :height="height" style="margin-left: 0px;" :width="width">
       <g style="shape-rendering: crispEdges;" transform="translate(0,20)">
@@ -156,6 +157,7 @@ export default {
   },
   // In the beginning...
   mounted () {
+    this.width = this.containerWidth
     // this.width = this.containerWidth
     // this.height = this.containerHeight
 

@@ -19,13 +19,33 @@ v-app#inspire
     overflow
     )
     v-app-bar-nav-icon(@click.stop='drawer = !drawer')
-    v-toolbar-title
-      | IAModeler&nbsp;
-      span(v-if="info && info.length>filteredRoles.length") {{filteredRoles.length}}/
-      span(v-if="info && info.length>0") {{info.length}} roles
-      span(v-if="permissions && permissions.length>0") &nbsp;[{{permissions.length}} permisos]
+    v-toolbar-title IAModeler
+    v-spacer
+    v-btn(@click='uiSnackbarRoles = true')
+      span(v-if="info && info.length>filteredRoles.length")
+        | {{filteredRoles.length}}/
+      span(v-if="info && info.length>0")
+        | {{info.length}}
+      v-icon mdi-shield-account
+    v-btn(v-if="permissions && permissions.length>0", @click='uiSnackbarPermissions = true')
+      | {{permissions.length}}
+      v-icon mdi-key-plus
     my-toolbar-progress-bar(:loading='loading', color='lime accent-3', slot='extension')
   router-view
+
+  v-snackbar(v-model='uiSnackbarRoles', left='', top='', vertical='')
+    | Hay
+    span(v-if="info && info.length>filteredRoles.length")
+      | {{filteredRoles.length}}/
+    span(v-if="info && info.length>0")
+      | {{info.length}}
+    | roles
+    v-btn(icon='', @click='uiSnackbarRoles = false')
+      v-icon mdi-window-close
+  v-snackbar(v-model='uiSnackbarPermissions', left='', top='', vertical='')
+    | Hay {{permissions.length}} permisos
+    v-btn(icon='', @click='uiSnackbarPermissions = false')
+      v-icon mdi-window-close
 </template>
 
 <script>
@@ -39,7 +59,9 @@ export default {
   components: { MyToolbarProgressBar },
 
   data: () => ({
-    drawer: false
+    drawer: false,
+    uiSnackbarRoles: false,
+    uiSnackbarPermissions: false
   }),
 
   computed: {

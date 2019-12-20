@@ -2,7 +2,7 @@
 v-content
   v-container
     v-row
-      v-col(cols='12', xs='12', sm='6', md='5', align='justify', ref='container')
+      v-col(cols='12', xs='12', sm='6', md='7', align='justify', ref='container')
         v-btn.mx-auto(small='', color='teal', @click='goTo("home")') Volver al listado
 
         v-card.mx-auto(v-if='role', elevation='12', :raised='true', :ripple='true')
@@ -12,24 +12,28 @@ v-content
             | {{role.name}}
           v-card-text
             | {{role.description}}
-            v-card
-              v-card-title
-                v-text-field(v-model='uiCompareViewExpandedSearch',
-                  append-icon='search',
-                  label='Filtrar lista de permisos',
-                  single-line='')
-              v-data-table(
-                v-if='role && role.includedPermissions'
-                :dense='false'
-                :dark='true'
-                :headers="[{'text': 'Permisos incluídos', 'sortable': 'true', 'value': 'name'}]"
-                :items="generateData(role.includedPermissions)"
-                :search='uiCompareViewExpandedSearch'
-              )
-                template(v-slot:body='{ items }')
-                  tbody
-                    tr(v-for='(perm, iperm) in items', :key='iperm')
-                      td.text-start(v-html='perm.name')
+            v-expansion-panels(:dark='false', :light='true')
+              v-expansion-panel
+                v-expansion-panel-header Permisos incluídos
+                v-expansion-panel-content
+                  v-card
+                    v-card-title
+                      v-text-field(v-model='uiCompareViewExpandedSearch',
+                        append-icon='search',
+                        label='Filtrar lista de permisos',
+                        single-line='')
+                    v-data-table(
+                      v-if='role && role.includedPermissions'
+                      :dense='false'
+                      :dark='true'
+                      :headers="[{'text': 'Permisos incluídos', 'sortable': 'true', 'value': 'name'}]"
+                      :items="generateData(role.includedPermissions)"
+                      :search='uiCompareViewExpandedSearch'
+                    )
+                      template(v-slot:body='{ items }')
+                        tbody
+                          tr(v-for='(perm, iperm) in items', :key='iperm')
+                            td.text-start(v-html='perm.name')
 
       v-col(cols='12', xs='12', sm='6', md='5', align='justify')
         TreeMap(v-if='role', :treeMapRawData='role.includedPermissions', :containerWidth='containerWidth', :containerHeight='containerHeight')
