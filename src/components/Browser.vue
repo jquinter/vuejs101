@@ -17,6 +17,65 @@ div
             template(v-slot:selection='{ attrs, item, select, selected }')
               v-chip(v-bind='attrs', :input-value='selected', close='', @click='select', @click:close='remove(item)')
                 strong {{ item }}
+        v-col(cols='12', xs='12', align='center',v-show='activeRoleFiltersPermissionsCSV')
+          v-expansion-panels
+            v-expansion-panel
+              v-expansion-panel-header
+                v-row
+                  v-col(cols='12', xs='12')
+                    h2 Rol personalizado
+                  v-col(cols='12', xs='12')
+                    span Si no encuentra un rol adecuado para los permisos que busca, recuerde que puede generar su propio rol usando este comando
+              v-expansion-panel-content
+                v-form
+                  v-row
+                    v-col(cols='12', xs='12', md='6')
+                      v-text-field(v-model='uiCustomRoleName',
+                        outlined='',
+                        label='Nombre del rol personalizado',
+                        hint='Este es el formato usado como bigquery.admin en roles/bigquery.admin'
+                      )
+                    v-col(cols='12', xs='12', md='6')
+                      v-text-field(v-model='uiCustomRoleTitle',
+                        :rules='textFieldRulesMax(100)',
+                        counter='100',
+                        outlined='',
+                        label='Título del rol personalizado',
+                        hint='Este es un título legible (así como BigQuery Admin)'
+                      )
+                    v-col(cols='12', xs='12', md='6')
+                      v-text-field(v-model='uiCustomRoleDescription',
+                        :rules='textFieldRulesMaxNoSpaces(256)',
+                        counter='256',
+                        outlined='',
+                        label='Descripción del rol personalizado',
+                        hint='Esto es opcional, debería describir el propósito del rol'
+                      )
+                    v-col(cols='12', xs='12', md='6')
+                      v-text-field(v-model='uiCustomRoleProjectId',
+                        outlined='',
+                        label='Proyecto donde se creará el rol personalizado',
+                        hint='este es el identificador del proyecto de destino'
+                      )
+                  v-row
+                    v-col(cols='12', xs='12')
+                      kbd.text-left
+                        | gcloud iam roles create {{uiCustomRoleName?uiCustomRoleName:'ROLENAME'}} \
+                        pre &#9;--project {{uiCustomRoleProjectId?uiCustomRoleProjectId:'PROJECTID'}} \
+                        pre &#9;--title "{{uiCustomRoleTitle?uiCustomRoleTitle:"ROLETITLE"}}" \
+                        pre(v-show='uiCustomRoleDescription') &#9;--description "{{uiCustomRoleDescription?uiCustomRoleDescription:"ROLEDESCRIPTION"}}" \
+                        pre(v-show='activeRoleFiltersPermissionsCSV') &#9;--permissions {{activeRoleFiltersPermissionsCSV}} \
+                        pre &#9;--stage ALPHA
+                  v-row
+                    v-col(cols='12', xs='12')
+                      v-alert(v-model='uiCustomRoleWarning', type='warning', dense='', dismissible='', border='top')
+                        p.text-justify
+                          | To create a custom role, a caller must possess iam.roles.create permission.
+                          | By default, the owner of a project or an organization has this permission and can create and manage custom roles.
+                          | Users who are not owners, including organization admins, must be assigned either the Organization Role Administrator role, or the IAM Role Administrator role.
+                      .text-center
+                        v-btn(v-if='!uiCustomRoleWarning', @click='uiCustomRoleWarning = true', color='warning') ¿Qué necesito para correr este comando?
+      v-row
         v-col(cols='12', xs='12', sm='6', md='3', align='center')
           v-btn.ma-2(color='lime accent-3', outlined='', v-on:click='uiSwitchView()')
             span {{ uiButtonSwitchViewText }}
@@ -151,7 +210,13 @@ export default {
   },
 
   data: () => ({
+    uiCustomRoleWarning: true,
+    uiCustomRoleName: '',
+    uiCustomRoleTitle: '',
+    uiCustomRoleDescription: '',
+    uiCustomRoleProjectId: '',
     uiInfiniteScrollLimit: 10,
+    uiInfiniteScrollBusy: false,
     uiButtonSwitchViewText: 'activar modo comparación',
     uiIsCompareView: false,
     uiItemsPerPage: 8,
@@ -214,6 +279,12 @@ export default {
     },
     uiNumberOfPages () {
       return Math.ceil(this.filteredRoles.length / this.uiItemsPerPage)
+    },
+    activeRoleFiltersPermissionsCSV () {
+      return this.activeRoleFilters.filter(item => {
+        var regexp = new RegExp("^[a-zA-Z]{1,}\\.[a-zA-Z]{1,}\\.[a-zA-Z]{1,}", 'i')
+        return item && regexp.test(item)
+      }).join()
     }
   },
 
@@ -230,6 +301,49 @@ export default {
   },
 
   methods: {
+    textFieldRulesMax (max) {
+      const rules = []
+
+      if (max) {
+        const rule =
+          v => (v || '').length <= max ||
+            `A maximum of ${max} characters is allowed`
+
+        rules.push(rule)
+      }
+
+      return rules
+    },
+    textFieldRulesMaxNoSpaces (max) {
+      const rules = []
+
+      if (max) {
+        const rule =
+          v => (v || '').length <= max ||
+            `A maximum of ${max} characters is allowed`
+
+        rules.push(rule)
+      }
+
+      //if (!this.allowSpaces) {
+      if (true) {
+        const rule =
+          v => (v || '').indexOf(' ') < 0 ||
+            'No spaces are allowed'
+
+        rules.push(rule)
+      }
+
+      // if (this.match) {
+      //   const rule =
+      //     v => (!!v && v) === this.match ||
+      //       'Values do not match'
+
+      //   rules.push(rule)
+      // }
+
+      return rules
+    },
     loadMore () {
       this.uiInfiniteScrollBusy = true
       this.uiPage++
@@ -351,7 +465,7 @@ export default {
       this.rolesAndMatchingPermissions = {}
       this.filterRoles()
 
-      console.log(this.uiIsCompareView, this.activeRoleFilters.length)
+      // console.log(this.uiIsCompareView, this.activeRoleFilters.length)
 
       if (this.activeRoleFilters.length > 0) {
         this.uiCompareViewLeastPriviledgePrinciple = true
