@@ -25,7 +25,10 @@ div
                   v-col(cols='12', xs='12')
                     h2 Rol personalizado
                   v-col(cols='12', xs='12')
-                    span Si no encuentra un rol adecuado para los permisos que busca, recuerde que puede generar su propio rol usando este comando
+                    span
+                      | Si no encuentra un rol adecuado para los permisos que busca, recuerde
+                      | que <a href='https://console.cloud.google.com/iam-admin/roles/create' target='_blank'>puede generar su propio rol</a>
+                      | usando este comando
               v-expansion-panel-content
                 v-form
                   v-row
