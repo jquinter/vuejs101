@@ -3,7 +3,7 @@ div
   v-content
     v-container#input-usage(fluid='')
       v-row
-        v-col(cols='12', xs='12', sm='6', md='9', align='center')
+        v-col(cols='12', xs='12', sm='6', md='7', align='center')
           v-combobox(v-model='activeRoleFilters',
             :items='searchfilter',
             hide-no-data,
@@ -78,10 +78,12 @@ div
                           | Users who are not owners, including organization admins, must be assigned either the Organization Role Administrator role, or the IAM Role Administrator role.
                       .text-center
                         v-btn(v-if='!uiCustomRoleWarning', @click='uiCustomRoleWarning = true', color='warning') ¿Qué necesito para correr este comando?
-      v-row
         v-col(cols='12', xs='12', sm='6', md='3', align='center')
           v-btn.ma-2(color='lime accent-3', outlined='', v-on:click='uiSwitchView()')
             span {{ uiButtonSwitchViewText }}
+        v-col(cols='12', xs='12', sm='6', md='2', align='center')
+          v-switch.mt-2(v-model='uiCompareViewLeastPriviledgePrinciple', color='lime accent-3', label='Least Priviledge Principle')
+
     v-container(fluid='')
       v-row(align='center', justify='center', v-if='false')
         v-col.shrink
@@ -101,11 +103,10 @@ div
             span Codepen
       transition-group.depth(name='gallery', tag='v-row', dense='')
         v-col(v-show='!uiIsCompareView',
-          v-for='(item, index) in filteredRoles',
+          v-for='(item, index) in uiCompareViewLeastPriviledgePrinciple ? leastPriviledgePrincipleFilteredRoles : filteredRoles',
           :key='index',
           v-if='rolesListItemShouldBeDisplayed(index)',
-          cols='12',
-          xs='12',
+          cols='6',
           sm='6',
           md='3')
           role(:role='item', :index='index+1', :query='activeRoleFilters')
@@ -128,7 +129,7 @@ div
                 v-toolbar(flat='')
                   v-toolbar-title(v-if='false') Roles
                   v-spacer
-                  v-switch.mt-2(v-model='uiCompareViewLeastPriviledgePrinciple', color='lime accent-3', label='Least Priviledge Principle')
+
               template(v-slot:expanded-item='{ headers, item }')
                 td(:colspan='headers.length')
                   v-card
@@ -138,18 +139,22 @@ div
                       v-text-field(v-model='uiCompareViewExpandedSearch',
                         append-icon='search',
                         label='Filtrar lista de permisos',
-                        single-line='')
+                        clearable=''
+                      )
                     v-data-table(
                       :dense='false'
                       :dark='true'
-                      :headers="[{'text': 'permission name', 'sortable': 'true', 'value': 'name'}]"
+                      :headers="[{'text': 'permission name', 'sortable': 'true', 'value': 'name'}, {'text': 'mayor', 'value': 'mayor'}]"
+                      :group-by="['mayor']"
+                      show-group-by=''
                       :items="generateData(item.includedPermissions)"
                       :search='uiCompareViewExpandedSearch'
                     )
-                      template(v-slot:body='{ items }')
-                        tbody
-                          tr(v-for='(perm, iperm) in items', :key='iperm')
-                            td.text-start(v-html='$options.filters.highlightRegExp(perm.name,activeRoleFilters)')
+                      template(v-slot:item='{ item }')
+                        tr
+                          td(v-if='uiCompareViewExpandedSearch', v-html='$options.filters.highlight(item.name, uiCompareViewExpandedSearch)')
+                          td(v-else='', v-html='$options.filters.highlightRegExp(item.name, activeRoleFilters)')
+                          td
 
     v-divider.ma-12
     infinite-loading.d-sm-none.pa-12.ma-12(@infinite='loadMore', :distance='uiInfiniteLoadingDistance', force-use-infinite-wrapper='v-content__wrap')
@@ -209,6 +214,7 @@ export default {
   },
 
   data: () => ({
+    leastPriviledgePrincipleFilteredRoles: [],
     uiCustomRoleWarning: true,
     uiCustomRoleName: '',
     uiCustomRoleTitle: '',
@@ -216,7 +222,7 @@ export default {
     uiCustomRoleProjectId: '',
     uiInfiniteLoadingDistance: 100,
     uiButtonSwitchViewText: 'activar modo comparación',
-    uiIsCompareView: false,
+    uiIsCompareView: true,
     uiItemsPerPage: 4,
     uiItemsPerPageArray: [4, 8, 12, -1],
     uiPage: 1,
@@ -270,8 +276,8 @@ export default {
     }
   }),
 
-  mounted() {
-    switch (this.$vuetify.breakpoint.name){
+  mounted () {
+    switch (this.$vuetify.breakpoint.name) {
       case 'xs':
         this.uiItemsPerPage = 4
         break
@@ -311,9 +317,9 @@ export default {
     rolesListItemShouldBeDisplayed (index) {
       switch (this.$vuetify.breakpoint.name) {
         case 'xs':
-          return index < (this.uiPage)*this.uiItemsPerPage
+          return index < (this.uiPage) * this.uiItemsPerPage
         default:
-          return index >= (this.uiPage-1)*this.uiItemsPerPage && index < (this.uiPage)*this.uiItemsPerPage
+          return index >= (this.uiPage - 1) * this.uiItemsPerPage && index < (this.uiPage) * this.uiItemsPerPage
       }
     },
     textFieldRulesMax (max) {
@@ -340,14 +346,12 @@ export default {
         rules.push(rule)
       }
 
-      //if (!this.allowSpaces) {
-      if (true) {
-        const rule =
-          v => (v || '').indexOf(' ') < 0 ||
-            'No spaces are allowed'
+      // if (!this.allowSpaces) {
+      const rule =
+        v => (v || '').indexOf(' ') < 0 ||
+          'No spaces are allowed'
 
-        rules.push(rule)
-      }
+      rules.push(rule)
 
       // if (this.match) {
       //   const rule =
@@ -362,18 +366,18 @@ export default {
     loadMore ($state) {
       console.log('loadMore requested', this.uiPage)
       setTimeout(() => {
-        if (this.uiPage + 1 <= this.uiNumberOfPages){
+        if (this.uiPage + 1 <= this.uiNumberOfPages) {
           this.uiPage += 1
           $state.loaded()
-        }
-        else{
+        } else {
           $state.complete()
         }
       }, 1000)
     },
     generateData (arrayData) {
+      if (!arrayData) return []
       return arrayData.map(function (item) {
-        return { name: item, value: item }
+        return { name: item, value: item, mayor: item.split('.')[0], minor: item.split('.')[1] }
       }, this)
     },
     load_start (msg) {
@@ -544,8 +548,13 @@ export default {
     },
     uiCompareViewLeastPriviledgePrinciple: function (newVal, oldVal) {
       if (newVal) {
-        this.uiCompareViewSortBy = ['includedPermissionsSize', 'name', 'title']
-        this.uiCompareViewSortDesc = [false, false, true]
+        if (this.activeRoleFilters.length > 0) {
+          this.uiCompareViewSortBy = ['includedPermissionsSize', 'name', 'title']
+          this.uiCompareViewSortDesc = [false, false, true]
+        } else {
+          this.uiCompareViewSortBy = ['includedPermissions.length', 'name', 'title']
+          this.uiCompareViewSortDesc = [false, false, true]
+        }
       } else {
         this.uiCompareViewSortBy = ['name', 'title']
         this.uiCompareViewSortDesc = [false, true]
@@ -553,6 +562,13 @@ export default {
     },
     filteredRoles: function (newVal, oldVal) {
       this.$store.commit('setFilteredRoles', newVal)
+
+      this.leastPriviledgePrincipleFilteredRoles = Object.assign([], newVal.slice())
+      this.leastPriviledgePrincipleFilteredRoles = this.leastPriviledgePrincipleFilteredRoles.sort((a, b) => {
+        let first = Object.assign([], a.includedPermissions)
+        let second = Object.assign([], b.includedPermissions)
+        return (first.length > second.length) ? 1 : -1
+      })
     }
   }
   /*

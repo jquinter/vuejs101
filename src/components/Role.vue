@@ -1,39 +1,92 @@
 <template lang='pug'>
-v-card.mx-auto(max-width='344', elevation='12', :raised='true', :ripple='true')
-  v-card-title.word-wrapped
-    div
-      v-row
-        v-col(cols='9')
-          | {{role.title}}
-        v-col(cols='3')
-          v-tooltip(right='', :light='true')
-            template(v-slot:activator='{ on }')
-              v-btn.mx-2(fab='', small='', color='teal', @click='goToRoleDetail(role.name)', v-on='on')
-                v-icon(dark='') mdi-format-list-bulleted-square
-            span Ver detalles de {{role.name}}
+div
+  v-card.mx-auto(max-width='344',
+    elevation='12',
+    :raised='true',
+    :ripple='true',
+    @click='overlay = !overlay')
+    v-card-title.word-wrapped
+      div
+        v-row
+          v-col(cols='8', sm='9')
+            | {{role.title}}
+          v-col(cols='4', sm='3')
+            v-tooltip(right='', :light='true')
+              template(v-slot:activator='{ on }')
+                v-btn(fab='', small='', color='primary', @click='goToRoleDetail(role.name)', v-on='on')
+                  v-icon(dark='') mdi-format-list-bulleted-square
+              span Ver detalles de {{role.name}}
+            v-btn(text='')
+              v-chip.ma-2(color='primary')
+                v-avatar(left='')
+                  v-icon mdi-key-plus
+                span(v-if='(role && role.matchingPermissions)') {{role.matchingPermissions.length}}/
+                span(v-if='(role && role.includedPermissions)') {{role.includedPermissions.length}}
+                span(v-else='') 0
+    v-card-subtitle
+      | {{role.description}}
 
-  v-card-subtitle
-    | {{role.name}}
-  v-card-actions
-    v-expansion-panels(:dark='false', :light='true')
-      v-expansion-panel
-        v-expansion-panel-header
-          | {{role.description}}
-          v-btn(text='')
-            v-chip
-              span(v-if='(role && role.matchingPermissions)') {{role.matchingPermissions.length}}/
-              span(v-if='(role && role.includedPermissions)') {{role.includedPermissions.length}}
-        v-expansion-panel-content(v-if='role.matchingPermissions')
-          p(v-for='(perm, iperm) in role.matchingPermissions', :key='iperm')
-            span.body-2(v-html='$options.filters.highlightRegExp(perm,query)')
-        v-expansion-panel-content(v-else='')
-          p(v-for='(perm, iperm) in role.includedPermissions', :key='iperm')
-            span.body-2(v-html='$options.filters.highlightRegExp(perm,query)')
+  v-overlay(:value='overlay', opacity='0.8')
+    v-card(
+      v-touch='{\
+        left: () => (overlay = false),\
+        right: () => (overlay = false),\
+      }',
+      min-width='recommendedOverlayWidth'
+      max-width='recommendedOverlayWidth'
+      elevation='12'
+      :raised='true'
+      :ripple='false')
+      v-card-subtitle.font-italic.font-weight-bold {{role.name}}
+
+      v-card-text
+        p.display-1.text--primary {{role.title}}
+        .text--primary {{role.description}}
+
+      v-card-subtitle
+        v-icon mdi-key-plus
+        | Included permissions
+      v-card-text
+        v-list.overflow-y-auto(dense=''
+          dark='',
+          max-height='60vh')
+          v-list-item-group(active-class='red--text')
+            template(v-for='(perm, iperm) in role.matchingPermissions ? role.matchingPermissions : role.includedPermissions')
+              v-list-item(:key='iperm')
+                template(v-slot:default='{ active, toggle }')
+                  v-list-item-content
+                    v-list-item-title.body-2.mywordbreak(v-html='$options.filters.highlightRegExp(perm,query)')
+      v-card-actions.d-flex.flex-row.justify-center
+        v-tooltip(bottom='', :light='true')
+          template(v-slot:activator='{ on }')
+            v-btn.mx-2(fab='', small='', color='primary', @click='goToRoleDetail(role.name)', v-on='on')
+              v-icon(dark='') mdi-format-list-bulleted-square
+          span Ver detalles de {{role.name}}
+        v-tooltip(bottom='', :light='true')
+          template(v-slot:activator='{ on }')
+            v-btn.mx-2(fab='', small='', color='primary', @click='overlay = false', v-on='on')
+              v-icon mdi-close
+          span Cerrar
 </template>
 
 <script>
 export default {
   name: 'Role',
+
+  computed: {
+    recommendedOverlayWidth () {
+      switch (this.$vuetify.breakpoint.name) {
+        case 'xs':
+          return '100vw'
+        default:
+          return '50vw'
+      }
+    }
+  },
+
+  data: () => ({
+    overlay: false
+  }),
 
   methods: {
     goToRoleDetail (name) {
@@ -66,7 +119,7 @@ export default {
 </style>
 
 <style scoped>
-.v-card__text, .v-card__title {
+.v-card__text, .v-card__title, .mywordbreak {
   word-break: normal; /* maybe !important  */
 }
 </style>
