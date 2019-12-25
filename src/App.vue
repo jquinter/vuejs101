@@ -22,14 +22,14 @@ v-app#inspire
     v-toolbar-title IAModeler
     v-spacer
     v-btn(@click='uiSnackbarRoles = true')
+      v-icon mdi-shield-account
       span(v-if="info && info.length>filteredRoles.length")
         | {{filteredRoles.length}}/
       span(v-if="info && info.length>0")
         | {{info.length}}
-      v-icon mdi-shield-account
     v-btn(v-if="permissions && permissions.length>0", @click='uiSnackbarPermissions = true')
-      | {{permissions.length}}
       v-icon mdi-key-plus
+      | {{permissions.length}}
     my-toolbar-progress-bar(:loading='loading', color='lime accent-3', slot='extension')
   router-view
 
