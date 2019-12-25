@@ -103,17 +103,7 @@ div
         v-col(v-show='!uiIsCompareView',
           v-for='(item, index) in filteredRoles',
           :key='index',
-          v-if='index >= (uiPage-1)*uiItemsPerPage && index < (uiPage)*uiItemsPerPage',
-          cols='12',
-          xs='12',
-          sm='6',
-          md='3')
-          role(:role='item', :index='index+1', :query='activeRoleFilters')
-      div.d-sm-none(v-infinite-scroll='loadMore', :infinite-scroll-disabled='uiInfiniteScrollBusy', :infinite-scroll-distance='uiInfiniteScrollLimit')
-        v-col(v-show='!uiIsCompareView',
-          v-for='(item, index) in filteredRoles',
-          v-if='index >= (uiPage-1)*uiItemsPerPage && index < (uiPage)*uiItemsPerPage',
-          :key='index',
+          v-if='rolesListItemShouldBeDisplayed(index)',
           cols='12',
           xs='12',
           sm='6',
@@ -161,6 +151,10 @@ div
                           tr(v-for='(perm, iperm) in items', :key='iperm')
                             td.text-start(v-html='$options.filters.highlightRegExp(perm.name,activeRoleFilters)')
 
+    v-divider.ma-12
+    infinite-loading.d-sm-none.pa-12.ma-12(@infinite='loadMore', :distance='uiInfiniteLoadingDistance', force-use-infinite-wrapper='v-content__wrap')
+      div(slot='no-more') No hay más datos
+      div(slot='no-results') No hay datos
   v-footer.d-none.d-sm-block(app='', padless='')
     v-row.mt-2(align='center', justify='center')
       v-col.d-none.d-sm-block(align='center', cols='12', md='3')
@@ -199,6 +193,8 @@ div
 
 <script>
 import { mapState } from 'vuex'
+import InfiniteLoading from 'vue-infinite-loading'
+
 function lazyLoad (view) {
   return () => import(`@/components/${view}.vue`)
 }
@@ -206,7 +202,7 @@ function lazyLoad (view) {
 export default {
   name: 'app',
 
-  components: { Role: lazyLoad('Role') },
+  components: { Role: lazyLoad('Role'), InfiniteLoading },
 
   props: {
     source: String
@@ -218,11 +214,10 @@ export default {
     uiCustomRoleTitle: '',
     uiCustomRoleDescription: '',
     uiCustomRoleProjectId: '',
-    uiInfiniteScrollLimit: 10,
-    uiInfiniteScrollBusy: false,
+    uiInfiniteLoadingDistance: 100,
     uiButtonSwitchViewText: 'activar modo comparación',
     uiIsCompareView: false,
-    uiItemsPerPage: 8,
+    uiItemsPerPage: 4,
     uiItemsPerPageArray: [4, 8, 12, -1],
     uiPage: 1,
     uiCompareViewLeastPriviledgePrinciple: false,
@@ -275,6 +270,15 @@ export default {
     }
   }),
 
+  mounted() {
+    switch (this.$vuetify.breakpoint.name){
+      case 'xs':
+        this.uiItemsPerPage = 4
+        break
+      default:
+        this.uiItemsPerPage = 8
+    }
+  },
   computed: {
     ...mapState(['loading', 'filteredRoles', 'info', 'permissions', 'roles']),
     searchfilter () {
@@ -285,7 +289,7 @@ export default {
     },
     activeRoleFiltersPermissionsCSV () {
       return this.activeRoleFilters.filter(item => {
-        var regexp = new RegExp("^[a-zA-Z]{1,}\\.[a-zA-Z]{1,}\\.[a-zA-Z]{1,}", 'i')
+        var regexp = new RegExp('^[a-zA-Z]{1,}\\.[a-zA-Z]{1,}\\.[a-zA-Z]{1,}', 'i')
         return item && regexp.test(item)
       }).join()
     }
@@ -304,6 +308,14 @@ export default {
   },
 
   methods: {
+    rolesListItemShouldBeDisplayed (index) {
+      switch (this.$vuetify.breakpoint.name) {
+        case 'xs':
+          return index < (this.uiPage)*this.uiItemsPerPage
+        default:
+          return index >= (this.uiPage-1)*this.uiItemsPerPage && index < (this.uiPage)*this.uiItemsPerPage
+      }
+    },
     textFieldRulesMax (max) {
       const rules = []
 
@@ -347,10 +359,17 @@ export default {
 
       return rules
     },
-    loadMore () {
-      this.uiInfiniteScrollBusy = true
-      this.uiPage++
-      this.uiInfiniteScrollBusy = false
+    loadMore ($state) {
+      console.log('loadMore requested', this.uiPage)
+      setTimeout(() => {
+        if (this.uiPage + 1 <= this.uiNumberOfPages){
+          this.uiPage += 1
+          $state.loaded()
+        }
+        else{
+          $state.complete()
+        }
+      }, 1000)
     },
     generateData (arrayData) {
       return arrayData.map(function (item) {

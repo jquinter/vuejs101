@@ -8,13 +8,13 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import routes from '@/routes'
 import store from '@/store'
 
-import infiniteScroll from 'vue-infinite-scroll'
+// import infiniteScroll from 'vue-infinite-scroll'
 
 Vue.use(VueRouter)
 
 const router = new VueRouter({ routes })
 
-Vue.use(infiniteScroll)
+// Vue.use(infiniteScroll)
 
 Vue.config.productionTip = true
 Vue.config.performance = false
