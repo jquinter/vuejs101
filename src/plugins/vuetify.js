@@ -1,8 +1,14 @@
 import Vue from 'vue'
-import Vuetify from 'vuetify'
+import Vuetify, {
+  VRow
+} from 'vuetify/lib'
 import colors from 'vuetify/lib/util/colors'
 
-Vue.use(Vuetify)
+Vue.use(Vuetify, {
+  components: {
+    VRow
+  }
+})
 
 export default new Vuetify({
   theme: {

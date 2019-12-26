@@ -96,7 +96,7 @@ div
           v-switch.mt-2(v-model='uiCompareViewLeastPriviledgePrinciple', color='lime accent-3', label='Least Priviledge Principle')
 
     v-container(fluid='')
-      transition-group.depth(name='gallery', tag='v-row', dense='')
+      transition-group.depth(name='gallery', tag='v-row')
         v-col(v-show='!uiIsCompareView',
           v-for='(item, index) in uiCompareViewLeastPriviledgePrinciple ? leastPriviledgePrincipleFilteredRoles : filteredRoles',
           :key='index',
@@ -214,7 +214,7 @@ export default {
     uiCustomRoleProjectId: '',
     uiInfiniteLoadingDistance: 100,
     uiButtonSwitchViewText: 'activar modo comparación',
-    uiIsCompareView: true,
+    uiIsCompareView: false,
     uiItemsPerPage: 4,
     uiItemsPerPageArray: [4, 8, 12, -1],
     uiPage: 1,
@@ -286,7 +286,7 @@ export default {
     activeRoleFiltersPermissionsCSV () {
       return this.activeRoleFilters.filter(item => {
         var regexp = new RegExp('^[a-zA-Z]{1,}\\.[a-zA-Z]{1,}\\.[a-zA-Z]{1,}', 'i')
-        return item && regexp.test(item)
+        return item && item.value && regexp.test(item.value)
       }).join()
     }
   },

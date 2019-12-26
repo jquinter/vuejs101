@@ -17,7 +17,7 @@ const router = new VueRouter({ routes })
 // Vue.use(infiniteScroll)
 
 Vue.config.productionTip = true
-Vue.config.performance = false
+Vue.config.performance = true
 
 Vue.filter('highlight', function (words, query) {
   return words.replace(query, '<span class="highlightText">' + query + '</span>')
