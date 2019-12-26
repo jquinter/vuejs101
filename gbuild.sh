@@ -5,7 +5,6 @@ usage(){
 }
 [[ $# -ne 3 ]] && usage
 
-docker push us.gcr.io/$2/$1:beta
 docker build --no-cache . -t $1
 docker tag $1 us.gcr.io/$2/$1:beta
 docker push us.gcr.io/$2/$1:beta
