@@ -1,4 +1,4 @@
-# vue101
+# IAModeler
 
 ## Project setup
 ```
