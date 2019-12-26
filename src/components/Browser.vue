@@ -561,7 +561,7 @@ export default {
           this.uiCompareViewSortBy = ['includedPermissions.length', 'name', 'title']
           this.uiCompareViewSortDesc = [false, false, true]
         }
-        this.leastPriviledgePrincipleFilteredRoles = Object.assign([], this.filterRoles.slice())
+        this.leastPriviledgePrincipleFilteredRoles = Object.assign([], this.filteredRoles.slice())
         this.leastPriviledgePrincipleFilteredRoles = this.leastPriviledgePrincipleFilteredRoles.sort((a, b) => {
           let first = Object.assign([], a.includedPermissions)
           let second = Object.assign([], b.includedPermissions)
