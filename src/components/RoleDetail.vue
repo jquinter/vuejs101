@@ -12,29 +12,8 @@ v-content
             | {{role.name}}
           v-card-text
             | {{role.description}}
-            v-expansion-panels(:dark='false', :light='true')
-              v-expansion-panel
-                v-expansion-panel-header Permisos incluídos
-                v-expansion-panel-content
-                  v-card
-                    v-card-title
-                      v-text-field(v-model='uiCompareViewExpandedSearch',
-                        append-icon='search',
-                        label='Filtrar lista de permisos',
-                        single-line='')
-                    v-data-table(
-                      v-if='role && role.includedPermissions'
-                      :dense='false'
-                      :dark='true'
-                      :headers="[{'text': 'Permisos incluídos', 'sortable': 'true', 'value': 'name'}]"
-                      :items="generateData(role.includedPermissions)"
-                      :search='uiCompareViewExpandedSearch'
-                    )
-                      template(v-slot:body='{ items }')
-                        tbody
-                          tr(v-for='(perm, iperm) in items', :key='iperm')
-                            td.text-start(v-html='perm.name')
-
+            v-card
+              expanded-item-permissions(:item='role', :activeRoleFilters='[]')
       v-col(cols='12', xs='12', sm='6', md='7', align='justify')
         TreeMap(v-if='role', :treeMapRawData='role.includedPermissions', :containerWidth='containerWidth', :containerHeight='containerHeight')
 
@@ -47,13 +26,17 @@ function lazyLoad (view) {
 
 export default {
   name: 'RoleDetail',
-  components: { Role: lazyLoad('Role'), TreeMap: lazyLoad('TreeMap') },
+  components: {
+    expandedItemPermissions: lazyLoad('includedPermissionsExpandedItemSlotDataTable'),
+    Role: lazyLoad('Role'),
+    TreeMap: lazyLoad('TreeMap')
+  },
 
   data: () => ({
-    uiCompareViewExpandedSearch: '',
     containerHeight: 0,
     containerWidth: 0,
-    container: {}
+    container: {},
+    headers: [{ 'text': 'Permisos incluídos', 'sortable': 'true', 'value': 'name' }]
   }),
 
   computed: {
@@ -69,7 +52,7 @@ export default {
     if (this.$refs.container) {
       this.containerHeight = this.$refs['container'].clientHeight
       this.containerWidth = this.$refs['container'].clientWidth - 24
-      console.log(this.$refs['container'].clientWidth)
+      // console.log(this.$refs['container'].clientWidth)
     }
   },
   methods: {

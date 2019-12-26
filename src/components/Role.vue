@@ -43,19 +43,8 @@ div
         p.display-1.text--primary {{role.title}}
         .text--primary {{role.description}}
 
-      v-card-subtitle
-        v-icon mdi-key-plus
-        | Included permissions
-      v-card-text
-        v-list.overflow-y-auto(dense=''
-          dark='',
-          max-height='60vh')
-          v-list-item-group(active-class='red--text')
-            template(v-for='(perm, iperm) in role.matchingPermissions ? role.matchingPermissions : role.includedPermissions')
-              v-list-item(:key='iperm')
-                template(v-slot:default='{ active, toggle }')
-                  v-list-item-content
-                    v-list-item-title.body-2.mywordbreak(v-html='$options.filters.highlightRegExp(perm,query)')
+      expanded-item-permissions(:item='role', :activeRoleFilters='query')
+
       v-card-actions.d-flex.flex-row.justify-center
         v-tooltip(bottom='', :light='true')
           template(v-slot:activator='{ on }')
@@ -70,8 +59,16 @@ div
 </template>
 
 <script>
+function lazyLoad (view) {
+  return () => import(`@/components/${view}.vue`)
+}
+
 export default {
   name: 'Role',
+
+  components: {
+    expandedItemPermissions: lazyLoad('includedPermissionsExpandedItemSlotDataTable')
+  },
 
   computed: {
     recommendedOverlayWidth () {
@@ -110,13 +107,6 @@ export default {
   }
 }
 </script>
-
-<style>
-.highlightText {
-  background-color: yellow;
-  color: black;
-}
-</style>
 
 <style scoped>
 .v-card__text, .v-card__title, .mywordbreak {

@@ -26,7 +26,7 @@ Vue.filter('highlight', function (words, query) {
 Vue.filter('highlightRegExp', function (words, querySet) {
   var highlighted = words
   for (let index = 0; index < querySet.length; index++) {
-    const query = querySet[index]
+    const query = querySet[index].value
     var regexp = new RegExp(query, 'gi')
     highlighted = highlighted.replace(regexp, function (x) {
       return '<span class="highlightText">' + x + '</span>'

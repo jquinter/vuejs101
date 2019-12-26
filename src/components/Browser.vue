@@ -4,8 +4,10 @@ div
     v-container#input-usage(fluid='')
       v-row
         v-col(cols='12', xs='12', sm='6', md='7', align='center')
-          v-combobox(v-model='activeRoleFilters',
+          v-combobox(:value='activeRoleFilters',
+            @change='uiActiveRoleFiltersChange'
             :items='searchfilter',
+            item-text='label',
             hide-no-data,
             chips='',
             clearable='',
@@ -14,9 +16,18 @@ div
             persistent-hint='',
             multiple='',
             prepend-icon='filter_list')
-            template(v-slot:selection='{ attrs, item, select, selected }')
-              v-chip(v-bind='attrs', :input-value='selected', close='', @click='select', @click:close='remove(item)')
-                strong {{ item }}
+            template(v-slot:item='data')
+              v-checkbox(:value='data.attrs.ariaSelected', :label='`${data.item.label} (${data.item.value})`', @selected='data.on')
+            template(v-slot:selection='data')
+              v-tooltip(top='', :light='true')
+                template(v-slot:activator='{ on }')
+                  v-chip(v-bind='data.attrs', :input-value='data.selected', close='', @click='data.select', @click:close='remove(data.item)', v-on='on')
+                    v-avatar(left='')
+                      v-icon(v-if='data.item.value.startsWith(\'roles\')') mdi-shield-account
+                      v-icon(v-else='') mdi-key-plus
+                    strong {{ data.item.label }}
+                span {{data.item.value}}
+
         v-col(cols='12', xs='12', align='center',v-show='activeRoleFiltersPermissionsCSV')
           v-expansion-panels
             v-expansion-panel
@@ -85,22 +96,6 @@ div
           v-switch.mt-2(v-model='uiCompareViewLeastPriviledgePrinciple', color='lime accent-3', label='Least Priviledge Principle')
 
     v-container(fluid='')
-      v-row(align='center', justify='center', v-if='false')
-        v-col.shrink
-          v-tooltip(right='')
-            template(v-slot:activator='{ on }')
-              v-btn(:href='source', icon='', large='', target='_blank', v-on='on')
-                v-icon(large='') mdi-code-tags
-            span Source
-          v-tooltip(right='')
-            template(v-slot:activator='{ on }')
-              v-btn(icon='',
-                large='',
-                href='https://codepen.io/johnjleider/pen/bXNzZL',
-                target='_blank',
-                v-on='on')
-                v-icon(large='') mdi-codepen
-            span Codepen
       transition-group.depth(name='gallery', tag='v-row', dense='')
         v-col(v-show='!uiIsCompareView',
           v-for='(item, index) in uiCompareViewLeastPriviledgePrinciple ? leastPriviledgePrincipleFilteredRoles : filteredRoles',
@@ -114,6 +109,9 @@ div
         v-col(v-show='uiIsCompareView')
           template
             v-data-table.elevation-1(:headers.sync='uiCompareViewHeaders',
+              :value='filteredRoles'
+              show-select='',
+              @item-selected='uiCompareViewItemSelected',
               :items='filteredRoles',
               item-key='name',
               :page.sync='uiPage',
@@ -132,58 +130,47 @@ div
 
               template(v-slot:expanded-item='{ headers, item }')
                 td(:colspan='headers.length')
-                  v-card
-                    v-card-title
-                      | Permisos incluídos
-                      v-spacer
-                      v-text-field(v-model='uiCompareViewExpandedSearch',
-                        append-icon='search',
-                        label='Filtrar lista de permisos',
-                        clearable=''
-                      )
-                    v-data-table(
-                      :dense='false'
-                      :dark='true'
-                      :headers="[{'text': 'permission name', 'sortable': 'true', 'value': 'name'}, {'text': 'mayor', 'value': 'mayor'}]"
-                      :group-by="['mayor']"
-                      show-group-by=''
-                      :items="generateData(item.includedPermissions)"
-                      :search='uiCompareViewExpandedSearch'
-                    )
-                      template(v-slot:item='{ item }')
-                        tr
-                          td(v-if='uiCompareViewExpandedSearch', v-html='$options.filters.highlight(item.name, uiCompareViewExpandedSearch)')
-                          td(v-else='', v-html='$options.filters.highlightRegExp(item.name, activeRoleFilters)')
-                          td
+                  expanded-item-permissions(:item='item', :activeRoleFilters='activeRoleFilters')
+                  v-tooltip(right='', :light='true')
+                    template(v-slot:activator='{ on }')
+                      v-btn(fab='', small='', color='primary', @click='goToRoleDetail(item.name)', v-on='on')
+                        v-icon(dark='') mdi-format-list-bulleted-square
+                    span Ver detalles de {{item.name}}
 
     v-divider.ma-12
-    infinite-loading.d-sm-none.pa-12.ma-12(@infinite='loadMore', :distance='uiInfiniteLoadingDistance', force-use-infinite-wrapper='v-content__wrap')
+    infinite-loading.d-sm-none.pa-12.ma-12(@infinite='loadMore',
+      ref="infiniteLoading",
+      :distance='uiInfiniteLoadingDistance',
+      force-use-infinite-wrapper='v-content__wrap')
       div(slot='no-more') No hay más datos
       div(slot='no-results') No hay datos
   v-footer.d-none.d-sm-block(app='', padless='')
     v-row.mt-2(align='center', justify='center')
       v-col.d-none.d-sm-block(align='center', cols='12', md='3')
-        span.grey--text Items per page
-        v-menu(offset-y='')
-          template(v-slot:activator='{ on }')
-            v-btn.ml-2(dark='', text='', color='lime darken-1', v-on='on')
-              | {{ uiItemsPerPage }}
-              v-icon mdi-chevron-down
-          v-list
-            v-list-item(v-for='(number, index) in uiItemsPerPageArray',
-              :key='index',
-              @click='uiUpdateItemsPerPage(number)')
-              v-list-item-title {{ number }}
+        div(v-show='!uiIsCompareView')
+          span.grey--text Items per page
+          v-menu(offset-y='')
+            template(v-slot:activator='{ on }')
+              v-btn.ml-2(dark='', text='', color='lime darken-1', v-on='on')
+                | {{ uiItemsPerPage }}
+                v-icon mdi-chevron-down
+            v-list
+              v-list-item(v-for='(number, index) in uiItemsPerPageArray',
+                :key='index',
+                @click='uiUpdateItemsPerPage(number)')
+                v-list-item-title {{ number }}
+
         v-spacer
 
         span.mr-4.grey--text(v-if='false')
           | Page {{ uiPage }} of {{ uiNumberOfPages }}
 
       v-col.d-none.d-sm-block(align='center', cols='12', md='6')
-        v-pagination(v-model='uiPage',
-          color='lime darken-3',
-          :length='uiNumberOfPages',
-          :total-visible='9')
+        div(v-show='!uiIsCompareView')
+          v-pagination(v-model='uiPage',
+            color='lime darken-3',
+            :length='uiNumberOfPages',
+            :total-visible='9')
 
       v-col.d-sm-none(align='center', cols='12', md='2')
         v-btn.mr-1(fab='', dark='', color='lime darken-3', @click='uiFormerPage')
@@ -205,15 +192,20 @@ function lazyLoad (view) {
 }
 
 export default {
-  name: 'app',
+  name: 'Browser',
 
-  components: { Role: lazyLoad('Role'), InfiniteLoading },
+  components: {
+    Role: lazyLoad('Role'),
+    expandedItemPermissions: lazyLoad('includedPermissionsExpandedItemSlotDataTable'),
+    InfiniteLoading
+  },
 
   props: {
     source: String
   },
 
   data: () => ({
+    uiActiveRoleFilters: [],
     leastPriviledgePrincipleFilteredRoles: [],
     uiCustomRoleWarning: true,
     uiCustomRoleName: '',
@@ -226,6 +218,7 @@ export default {
     uiItemsPerPage: 4,
     uiItemsPerPageArray: [4, 8, 12, -1],
     uiPage: 1,
+    uiCompareViewSelected: [],
     uiCompareViewLeastPriviledgePrinciple: false,
     uiCompareViewSortBy: [],
     uiCompareViewSortDesc: [],
@@ -235,7 +228,6 @@ export default {
     },
     uiCompareViewExpanded: [],
     uiCompareViewSingleExpand: false,
-    uiCompareViewExpandedSearch: '',
     uiCompareViewHeaders: [
       {
         text: 'Name',
@@ -257,8 +249,6 @@ export default {
       },
       { text: '', value: 'data-table-expand' }
     ],
-    activeRoleFilters: [],
-    on: null,
     rolefilter: '',
     debouncedrolefilter: '',
     rolesAndMatchingPermissions: {},
@@ -286,7 +276,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['loading', 'filteredRoles', 'info', 'permissions', 'roles']),
+    ...mapState(['activeRoleFilters', 'loading', 'filteredRoles', 'info', 'permissions', 'roles']),
     searchfilter () {
       return this.roles.concat(this.permissions)
     },
@@ -314,6 +304,19 @@ export default {
   },
 
   methods: {
+    uiActiveRoleFiltersChange (data) {
+      this.$store.commit('setActiveRoleFilters', data)
+    },
+    uiCompareViewItemSelected (data) {
+      this.$store.commit('removeFromActiveRoleFilters', { 'value': data.item.name, 'label': data.item.title })
+
+      if (data.value) {
+        this.$store.commit('addToActiveRoleFilters', { 'value': data.item.name, 'label': data.item.title })
+      }
+    },
+    goToRoleDetail (name) {
+      this.$router.push({ name: 'role', params: { name } })
+    },
     rolesListItemShouldBeDisplayed (index) {
       switch (this.$vuetify.breakpoint.name) {
         case 'xs':
@@ -374,12 +377,6 @@ export default {
         }
       }, 1000)
     },
-    generateData (arrayData) {
-      if (!arrayData) return []
-      return arrayData.map(function (item) {
-        return { name: item, value: item, mayor: item.split('.')[0], minor: item.split('.')[1] }
-      }, this)
-    },
     load_start (msg) {
       if (msg) {
         console.log('starting...', msg)
@@ -399,7 +396,7 @@ export default {
         for (let index = 0; index < this.activeRoleFilters.length; index++) {
           /* for each role filter */
 
-          const filteringByRole = this.activeRoleFilters[index]
+          const filteringByRole = this.activeRoleFilters[index].value
 
           /* Ampliación de filtro de búsqueda: podemos buscar por calce de codigo de rol */
           if (filteringByRole.startsWith('roles/')) {
@@ -463,8 +460,8 @@ export default {
       }
     },
     remove (item) {
-      this.activeRoleFilters.splice(this.activeRoleFilters.indexOf(item), 1)
-      this.activeRoleFilters = [...this.activeRoleFilters]
+      this.$store.commit('removeFromActiveRoleFilters', item)
+      // this.activeRoleFilters = [...this.activeRoleFilters]
     },
     uiSwitchView () {
       if (this.uiIsCompareView) {
@@ -488,6 +485,13 @@ export default {
   },
   watch: {
     activeRoleFilters: function (newVal, oldVal) {
+      for (let index = 0; index < newVal.length; index++) {
+        const element = newVal[index]
+        if (typeof element === 'string') {
+          newVal[index] = { 'value': element, 'label': element }
+        }
+      }
+
       this.rolesAndMatchingPermissions = {}
       this.filterRoles()
 
@@ -561,7 +565,11 @@ export default {
       }
     },
     filteredRoles: function (newVal, oldVal) {
-      this.$store.commit('setFilteredRoles', newVal)
+      // this.$store.commit('setFilteredRoles', newVal)
+      if (this.$refs.infiniteLoading) {
+        // https://stackoverflow.com/questions/54044709/how-to-reset-a-vue-infinite-loading-element
+        this.$refs.infiniteLoading.stateChanger.reset()
+      }
 
       this.leastPriviledgePrincipleFilteredRoles = Object.assign([], newVal.slice())
       this.leastPriviledgePrincipleFilteredRoles = this.leastPriviledgePrincipleFilteredRoles.sort((a, b) => {

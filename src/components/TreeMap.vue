@@ -1,6 +1,6 @@
 <template>
   <div class="treemap">
-    <span class="caption"> Este gráfico es interactivo: pincha las zonas para ver detalles jerárquicos</span>
+    <blockquote class="blockquote"> Este gráfico es interactivo: pincha las zonas para ver detalles jerárquicos</blockquote>
     <!-- The SVG structure is explicitly defined in the template with attributes derived from component data -->
     <svg :height="height" style="margin-left: 0px;" :width="width">
       <g style="shape-rendering: crispEdges;" transform="translate(0,20)">

@@ -65,7 +65,7 @@ export default {
   }),
 
   computed: {
-    ...mapState(['loading', 'filteredRoles', 'info', 'permissions', 'roles'])
+    ...mapState(['activeRoleFilters', 'loading', 'filteredRoles', 'info', 'permissions', 'roles'])
   },
 
   methods: {
@@ -82,11 +82,13 @@ export default {
     this.$store.commit('setLoading', true)
     const rolesRaw = await axios.get(dataUrl)
     this.$store.commit('setInfo', Object.freeze(rolesRaw.data.slice()))
-    this.$store.commit('setFilteredRoles', Object.freeze(rolesRaw.data.slice()))
-    this.$store.commit('setRoles', Object.freeze(rolesRaw.data.slice()).map(x => x.name))
+    if (this.activeRoleFilters.length === 0) {
+      this.$store.commit('setFilteredRoles', Object.freeze(rolesRaw.data.slice()))
+    }
+    this.$store.commit('setRoles', Object.freeze(rolesRaw.data.slice()).map(x => ({ 'value': x.name, 'label': x.title })))
 
     const permissionsRaw = await axios.get('/data/permissions_roles.json')
-    this.$store.commit('setPermissions', Object.freeze(permissionsRaw.data.slice()).map(x => x.permission))
+    this.$store.commit('setPermissions', Object.freeze(permissionsRaw.data.slice()).map(x => ({ 'value': x.permission, 'label': x.permission })))
     this.$store.commit('setLoading', false)
   }
 }
@@ -98,5 +100,9 @@ export default {
 }
 tbody tr:nth-of-type(odd), .v-expansion-panel-content p:nth-of-type(odd) {
   background-color: rgba(0, 0, 0, .15);
+}
+.highlightText {
+  background-color: yellow;
+  color: black;
 }
 </style>
