@@ -85,10 +85,10 @@ export default {
     if (this.activeRoleFilters.length === 0) {
       this.$store.commit('setFilteredRoles', Object.freeze(rolesRaw.data.slice()))
     }
-    this.$store.commit('setRoles', Object.freeze(rolesRaw.data.slice()).map(x => ({ 'value': x.name, 'label': x.title })))
+    this.$store.commit('setRoles', rolesRaw.data.slice().map(x => ({ 'value': x.name, 'label': x.title })))
 
     const permissionsRaw = await axios.get('/data/permissions_roles.json')
-    this.$store.commit('setPermissions', Object.freeze(permissionsRaw.data.slice()).map(x => ({ 'value': x.permission, 'label': x.permission })))
+    this.$store.commit('setPermissions', permissionsRaw.data.slice().map(x => ({ 'value': x.permission, 'label': x.permission })))
     this.$store.commit('setLoading', false)
   }
 }

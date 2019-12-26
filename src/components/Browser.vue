@@ -99,7 +99,7 @@ div
       transition-group.depth(name='gallery', tag='v-row')
         v-col(v-show='!uiIsCompareView',
           v-for='(item, index) in uiCompareViewLeastPriviledgePrinciple ? leastPriviledgePrincipleFilteredRoles : filteredRoles',
-          :key='index',
+          :key='`key-${index}`',
           v-if='rolesListItemShouldBeDisplayed(index)',
           cols='6',
           sm='6',

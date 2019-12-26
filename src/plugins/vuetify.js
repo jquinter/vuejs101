@@ -1,12 +1,16 @@
 import Vue from 'vue'
 import Vuetify, {
-  VRow
+  VRow,
+  Touch
 } from 'vuetify/lib'
 import colors from 'vuetify/lib/util/colors'
 
 Vue.use(Vuetify, {
   components: {
     VRow
+  },
+  directives: {
+    Touch
   }
 })
 
