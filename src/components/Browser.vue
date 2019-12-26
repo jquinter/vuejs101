@@ -287,7 +287,9 @@ export default {
       return this.activeRoleFilters.filter(item => {
         var regexp = new RegExp('^[a-zA-Z]{1,}\\.[a-zA-Z]{1,}\\.[a-zA-Z]{1,}', 'i')
         return item && item.value && regexp.test(item.value)
-      }).join()
+      })
+      .map(x => x.value)
+      .join()
     }
   },
 
