@@ -328,8 +328,9 @@ export default {
   computed: {
     ...mapState(['activeRoleFilters', 'loading', 'filteredRoles', 'info', 'permissions', 'roles']),
     uiInfiniteLoadingDistance () {
-      if (this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width)
+      if (this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width) {
         return 10
+      }
       return 100
     },
     displayFooter () {
