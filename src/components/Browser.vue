@@ -3,7 +3,7 @@ div
   v-content
     v-container#input-usage(fluid='')
       v-row
-        v-col(cols='12', xs='12', sm='6', md='7', align='center')
+        v-col(cols='12', sm='4', md='7', align='center')
           v-combobox(:value='activeRoleFilters',
             @change='uiActiveRoleFiltersChange'
             :items='searchfilter',
@@ -23,12 +23,12 @@ div
                 template(v-slot:activator='{ on }')
                   v-chip(v-bind='data.attrs', :input-value='data.selected', close='', @click='data.select', @click:close='remove(data.item)', v-on='on')
                     v-avatar(left='')
-                      v-icon(v-if='data.item.value.startsWith(\'roles\')') mdi-shield-account
+                      v-icon(v-if='data.item.value.startsWith("roles")') mdi-shield-account
                       v-icon(v-else='') mdi-key-plus
                     strong {{ data.item.label }}
                 span {{data.item.value}}
 
-        v-col(cols='12', xs='12', align='center',v-show='activeRoleFiltersPermissionsCSV')
+        v-col(cols='12', align='center',v-show='activeRoleFiltersPermissionsCSV')
           v-expansion-panels
             v-expansion-panel
               v-expansion-panel-header
@@ -43,7 +43,7 @@ div
               v-expansion-panel-content
                 v-form
                   v-row
-                    v-col(cols='12', xs='12', md='6')
+                    v-col(cols='12', md='6')
                       v-text-field(v-model='uiCustomRoleName',
                         outlined='',
                         label='Nombre del rol personalizado',
@@ -89,10 +89,9 @@ div
                           | Users who are not owners, including organization admins, must be assigned either the Organization Role Administrator role, or the IAM Role Administrator role.
                       .text-center
                         v-btn(v-if='!uiCustomRoleWarning', @click='uiCustomRoleWarning = true', color='warning') ¿Qué necesito para correr este comando?
-        v-col(cols='12', xs='12', sm='6', md='3', align='center')
-          v-btn.ma-2(color='lime accent-3', outlined='', v-on:click='uiSwitchView()')
-            span {{ uiButtonSwitchViewText }}
-        v-col(cols='12', xs='12', sm='6', md='2', align='center')
+        v-col(cols='6', sm='4', md='3', align='center')
+          v-switch.mt-2(v-model='uiIsCompareView', color='lime accent-3', :label='uiButtonSwitchViewText')
+        v-col(cols='6', sm='4', md='2', align='center')
           v-switch.mt-2(v-model='uiCompareViewLeastPriviledgePrinciple', color='lime accent-3', label='Least Priviledge Principle')
 
     v-container(fluid='')
@@ -109,6 +108,7 @@ div
         v-col(v-show='uiIsCompareView')
           template
             v-data-table.elevation-1(:headers.sync='uiCompareViewHeaders',
+              :mobile-breakpoint='800',
               :value='filteredRoles'
               show-select='',
               @item-selected='uiCompareViewItemSelected',
@@ -138,13 +138,13 @@ div
                     span Ver detalles de {{item.name}}
 
     v-divider.ma-12
-    infinite-loading.d-sm-none.pa-12.ma-12(@infinite='loadMore',
+    infinite-loading.pa-12.ma-12(@infinite='loadMore',
       ref="infiniteLoading",
       :distance='uiInfiniteLoadingDistance',
       force-use-infinite-wrapper='v-content__wrap')
       div(slot='no-more') No hay más datos
       div(slot='no-results') No hay datos
-  v-footer.d-none.d-sm-block(app='', padless='')
+  v-footer.d-none.d-sm-block(v-if='displayFooter', app='', padless='')
     v-row.mt-2(align='center', justify='center')
       v-col.d-none.d-sm-block(align='center', cols='12', md='3')
         div(v-show='!uiIsCompareView')
@@ -212,7 +212,6 @@ export default {
     uiCustomRoleTitle: '',
     uiCustomRoleDescription: '',
     uiCustomRoleProjectId: '',
-    uiInfiniteLoadingDistance: 100,
     uiButtonSwitchViewText: 'activar modo comparación',
     uiIsCompareView: false,
     uiItemsPerPage: 4,
@@ -220,8 +219,8 @@ export default {
     uiPage: 1,
     uiCompareViewSelected: [],
     uiCompareViewLeastPriviledgePrinciple: false,
-    uiCompareViewSortBy: [],
-    uiCompareViewSortDesc: [],
+    uiCompareViewSortBy: ['name', 'title'],
+    uiCompareViewSortDesc: [false, true],
     uiCompareViewFooterProps: {
       'disable-items-per-page': false,
       'items-per-page-options': [4, 8, 12, -1]
@@ -274,9 +273,77 @@ export default {
       default:
         this.uiItemsPerPage = 8
     }
+    if (this.activeRoleFilters.length > 0) {
+      this.uiCompareViewHeaders = [
+        {
+          text: 'Name',
+          align: 'left',
+          sortable: true,
+          value: 'name'
+        },
+        {
+          text: 'Title',
+          align: 'left',
+          sortable: true,
+          value: 'title'
+        },
+        {
+          text: 'matching permissions',
+          align: 'center',
+          sortable: true,
+          value: 'matchingPermissionsSize'
+        },
+        {
+          text: '# of permissions',
+          align: 'center',
+          sortable: true,
+          value: 'includedPermissionsSize'
+        },
+        { text: '', value: 'data-table-expand' }
+      ]
+    } else {
+      this.uiCompareViewHeaders = [
+        {
+          text: 'Name',
+          align: 'left',
+          sortable: true,
+          value: 'name'
+        },
+        {
+          text: 'Title',
+          align: 'left',
+          sortable: true,
+          value: 'title'
+        },
+        {
+          text: '# of permissions',
+          align: 'center',
+          sortable: true,
+          value: 'includedPermissions.length'
+        },
+        { text: '', value: 'data-table-expand' }
+      ]
+    }
   },
   computed: {
     ...mapState(['activeRoleFilters', 'loading', 'filteredRoles', 'info', 'permissions', 'roles']),
+    uiInfiniteLoadingDistance () {
+      if (this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width)
+        return 10
+      return 100
+    },
+    displayFooter () {
+      if (this.$vuetify.breakpoint.xs || this.$vuetify.breakpoint.sm) {
+        return this.$vuetify.breakpoint.height > this.$vuetify.breakpoint.width
+      }
+      return true
+    },
+    uiOrientationLandscape () {
+      return this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
+    },
+    uiOrientationPortrait () {
+      return this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
+    },
     searchfilter () {
       return this.roles.concat(this.permissions)
     },
@@ -288,8 +355,8 @@ export default {
         var regexp = new RegExp('^[a-zA-Z]{1,}\\.[a-zA-Z]{1,}\\.[a-zA-Z]{1,}', 'i')
         return item && item.value && regexp.test(item.value)
       })
-      .map(x => x.value)
-      .join()
+        .map(x => x.value)
+        .join()
     }
   },
 
@@ -322,6 +389,8 @@ export default {
     rolesListItemShouldBeDisplayed (index) {
       switch (this.$vuetify.breakpoint.name) {
         case 'xs':
+          return index < (this.uiPage) * this.uiItemsPerPage
+        case 'sm':
           return index < (this.uiPage) * this.uiItemsPerPage
         default:
           return index >= (this.uiPage - 1) * this.uiItemsPerPage && index < (this.uiPage) * this.uiItemsPerPage

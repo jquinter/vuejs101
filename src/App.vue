@@ -2,11 +2,16 @@
 v-app#inspire
   v-navigation-drawer(v-model='drawer', app='', clipped='')
     v-list(dense='')
-      v-list-item(link='', @click='goTo("home")')
+      v-list-item(link='', @click='goTo("browser")')
+        v-list-item-action
+          v-icon mdi-format-list-bulleted-square
+        v-list-item-content
+          v-list-item-title Browser
+      v-list-item(link='', @click='goTo("modeler")')
         v-list-item-action
           v-icon mdi-view-dashboard
         v-list-item-content
-          v-list-item-title Dashboard
+          v-list-item-title Modeler
       v-list-item(link='')
         v-list-item-action
           v-icon mdi-settings
