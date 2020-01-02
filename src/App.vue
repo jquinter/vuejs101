@@ -84,8 +84,8 @@ export default {
   }),
 
   computed: {
-    ...mapState(['activeRoleFilters',
-      'activePermissionsFilters',
+    ...mapState([
+      'activeRoleFilters',
       'loading',
       'filteredRoles',
       'filteredPermissions',
@@ -122,7 +122,7 @@ export default {
       'label': x.permission.split('.').join(' '),
       'roles': x.roles
     })))
-    if (this.activePermissionsFilters.length === 0) {
+    if (this.activeRoleFilters.length === 0) {
       this.$store.commit('setFilteredPermissions', Object.freeze(permissionsRaw.data.slice()).map(x => ({
         'title': x.permission,
         'label': x.permission.split('.').join(' '),

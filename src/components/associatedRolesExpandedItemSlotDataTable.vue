@@ -26,10 +26,10 @@ v-card
       template(v-slot:item='{ item }')
         tr
           td(v-if='uiCompareViewExpandedSearch')
-            v-btn.mx-2(small='', text='', @click='goToRoleDetail(item.title)')
+            v-btn.mx-2(small='', text='', @click='goToRoleDetail(item.name)')
               span(v-html='$options.filters.highlight(item.name, uiCompareViewExpandedSearch)')
           td(v-else='')
-            v-btn.mx-2(small='', text='', @click='goToRoleDetail(item.title)')
+            v-btn.mx-2(small='', text='', @click='goToRoleDetail(item.name)')
               span(v-html='$options.filters.highlightRegExp(item.name, activeRoleFilters)')
           td
 </template>

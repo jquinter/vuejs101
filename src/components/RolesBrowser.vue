@@ -294,6 +294,7 @@ export default {
       'filteredPermissions',
       'info',
       'permissions',
+      'permissionsRaw',
       'roles',
       'uiCompareViewLeastPriviledgePrinciple'
     ]),
@@ -509,6 +510,7 @@ export default {
         } /* for each role filter */
       } else {
         this.$store.commit('setFilteredRoles', this.info)
+        this.$store.commit('setFilteredPermissions', this.permissionsRaw)
       }
     },
     remove (item) {

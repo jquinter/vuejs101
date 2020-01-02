@@ -154,7 +154,7 @@ export default {
     uiItemsPerPageArray: [4, 8, 12, -1],
     uiPage: 1,
     uiCompareViewSelected: [],
-    uiCompareViewSortBy: ['name', 'title'],
+    uiCompareViewSortBy: ['label', 'title'],
     uiCompareViewSortDesc: [false, true],
     uiCompareViewFooterProps: {
       'disable-items-per-page': false,
@@ -167,7 +167,7 @@ export default {
         text: 'Name',
         align: 'left',
         sortable: true,
-        value: 'name'
+        value: 'label'
       },
       {
         text: 'Title',
@@ -214,7 +214,7 @@ export default {
           text: 'Name',
           align: 'left',
           sortable: true,
-          value: 'name'
+          value: 'label'
         },
         {
           text: 'Title',
@@ -236,7 +236,7 @@ export default {
           text: 'Name',
           align: 'left',
           sortable: true,
-          value: 'name'
+          value: 'label'
         },
         {
           text: 'Title',
@@ -438,6 +438,7 @@ export default {
           this.$store.commit('setFilteredPermissions', Object.freeze(Array.from(matchingPermissions).slice()))
         } /* for each role filter */
       } else {
+        this.$store.commit('setFilteredRoles', this.info)
         this.$store.commit('setFilteredPermissions', this.permissionsRaw)
       }
     },
@@ -482,7 +483,7 @@ export default {
             text: 'Name',
             align: 'left',
             sortable: true,
-            value: 'name'
+            value: 'label'
           },
           {
             text: 'Title',
@@ -510,7 +511,7 @@ export default {
             text: 'Name',
             align: 'left',
             sortable: true,
-            value: 'name'
+            value: 'label'
           },
           {
             text: 'Title',
