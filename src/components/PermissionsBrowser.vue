@@ -3,7 +3,7 @@ div
   v-content
     v-container#input-usage(fluid='')
       v-row
-        v-col(cols='12', sm='4', md='7', align='center')
+        v-col(cols='12', md='7', align='center')
           v-combobox(:value='activePermissionsFilters',
             @change='uiActivePermissionsFiltersChange'
             :items='searchfilter',
@@ -28,7 +28,7 @@ div
                     strong {{ data.item.label }}
                 span {{data.item.value}}
 
-        v-col(cols='6', sm='8', md='5', align='center')
+        v-col(cols='6', md='5', align='center')
           v-switch.mt-2(v-model='uiIsCompareView', color='lime accent-3', :label='uiButtonSwitchViewText')
 
     v-container(fluid='')

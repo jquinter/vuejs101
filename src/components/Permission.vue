@@ -34,6 +34,7 @@ div
 
       v-card-text
         p.display-1.text--primary {{item.label}}
+        small Swipe to dismiss/close
 
       expanded-item-permissions(:item='item', :activeRoleFilters='query')
 

@@ -4,7 +4,7 @@ div
     elevation='12',
     :raised='true',
     :ripple='true',
-    @click='overlay = !overlay')
+    @click='uiOrientationLandscape ? overlay = overlay : overlay = !overlay')
     v-card-title.word-wrapped
       div
         v-row
@@ -40,6 +40,7 @@ div
       v-card-subtitle.font-italic.font-weight-bold {{role.name}}
 
       v-card-text
+        small Swipe to dismiss/close
         p.display-1.text--primary {{role.title}}
         .text--primary {{role.description}}
 
@@ -71,6 +72,9 @@ export default {
   },
 
   computed: {
+    uiOrientationLandscape () {
+      return this.$vuetify.breakpoint.height < this.$vuetify.breakpoint.width
+    },
     recommendedOverlayWidth () {
       switch (this.$vuetify.breakpoint.name) {
         case 'xs':

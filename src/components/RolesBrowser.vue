@@ -3,7 +3,7 @@ div
   v-content
     v-container#input-usage(fluid='')
       v-row
-        v-col(cols='12', sm='4', md='8', align='center')
+        v-col(cols='12', md='8', align='center')
           v-combobox(:value='activeRoleFilters',
             @change='uiActiveRoleFiltersChange'
             :items='searchfilter',
@@ -28,9 +28,9 @@ div
                     strong {{ data.item.label }}
                 span {{data.item.value}}
 
-        v-col(cols='6', sm='4', md='2', align='center')
+        v-col(cols='6', md='2', align='center')
           v-switch.mt-2(v-model='uiIsCompareView', color='lime accent-3', :label='uiButtonSwitchViewText')
-        v-col(cols='6', sm='4', md='2', align='center')
+        v-col(cols='6', md='2', align='center')
           v-switch.mt-2(v-model='lpp',
             color='lime accent-3',
             label='Least Priviledge Principle')
@@ -320,7 +320,7 @@ export default {
       return true
     },
     uiOrientationLandscape () {
-      return this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
+      return this.$vuetify.breakpoint.height < this.$vuetify.breakpoint.width
     },
     uiOrientationPortrait () {
       return this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width
