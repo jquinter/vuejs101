@@ -220,6 +220,14 @@ export default {
       return (first.length > second.length) ? 1 : -1
     })
     if (this.activeRoleFilters.length > 0) {
+      this.uiCompareViewSortBy = ['includedPermissionsSize', 'name', 'title']
+      this.uiCompareViewSortDesc = [false, false, true]
+    } else {
+      this.uiCompareViewSortBy = ['includedPermissions.length', 'name', 'title']
+      this.uiCompareViewSortDesc = [false, false, true]
+    }
+
+    if (this.activeRoleFilters.length > 0) {
       this.uiCompareViewHeaders = [
         {
           text: 'Name',

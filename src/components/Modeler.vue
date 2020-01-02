@@ -436,7 +436,7 @@ export default {
         value: 'title'
       },
       {
-        text: '# of permissions',
+        text: 'total permissions in role',
         align: 'center',
         sortable: true,
         value: 'includedPermissions.length'
@@ -488,6 +488,14 @@ export default {
   },
 
   mounted () {
+    if (this.activeRoleFilters.length > 0) {
+      this.uiCompareViewSortBy = ['includedPermissionsSize', 'name', 'title']
+      this.uiCompareViewSortDesc = [false, false, true]
+    } else {
+      this.uiCompareViewSortBy = ['includedPermissions.length', 'name', 'title']
+      this.uiCompareViewSortDesc = [false, false, true]
+    }
+
     this.leastPriviledgePrincipleFilteredRoles = Object.assign([], this.filteredRoles.slice())
     this.leastPriviledgePrincipleFilteredRoles = this.leastPriviledgePrincipleFilteredRoles.sort((a, b) => {
       let first = Object.assign([], a.includedPermissions)
@@ -522,7 +530,7 @@ export default {
           value: 'missingPermissionsSize'
         },
         {
-          text: '# of permissions',
+          text: 'total permissions in role',
           align: 'center',
           sortable: true,
           value: 'includedPermissionsSize'
@@ -544,7 +552,7 @@ export default {
           value: 'title'
         },
         {
-          text: '# of permissions',
+          text: 'total permissions in role',
           align: 'center',
           sortable: true,
           value: 'includedPermissions.length'
