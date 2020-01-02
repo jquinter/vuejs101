@@ -1,11 +1,11 @@
-const isProd = process.env.NODE_ENV === "production"
+const isProd = process.env.NODE_ENV === 'production'
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 const TerserPlugin = require('terser-webpack-plugin')
-require("@babel/polyfill");
+require('@babel/polyfill')
 
 module.exports = {
-  entry: ["@babel/polyfill", "./app/js"],
+  entry: ['@babel/polyfill', './app/js'],
   // entry: './src/main.js',
   output: {
     path: require('path').resolve(__dirname, 'dist'),
@@ -17,12 +17,9 @@ module.exports = {
       '@': require('path').resolve(__dirname, 'src')
     }
   },
-  plugins: [new VueLoaderPlugin()
-    , new VuetifyLoaderPlugin()
-    , new TerserPlugin()
-    , new JavaScriptObfuscator({
-      identifierNamesGenerator: 'mangled'
-    })
+  plugins: [new VueLoaderPlugin(),
+    new VuetifyLoaderPlugin(),
+    new TerserPlugin()
   ],
   module: {
     rules: [
