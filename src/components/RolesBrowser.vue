@@ -213,6 +213,10 @@ export default {
       default:
         this.uiItemsPerPage = 8
     }
+
+    this.rolesAndMatchingPermissions = {}
+    this.filterRoles()
+
     this.leastPriviledgePrincipleFilteredRoles = Object.assign([], this.filteredRoles.slice())
     this.leastPriviledgePrincipleFilteredRoles = this.leastPriviledgePrincipleFilteredRoles.sort((a, b) => {
       let first = Object.assign([], a.includedPermissions)

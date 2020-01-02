@@ -208,6 +208,9 @@ export default {
       default:
         this.uiItemsPerPage = 8
     }
+    this.rolesAndMatchingPermissions = {}
+    this.filterPermissions()
+
     if (this.activePermissionsFilters.length > 0) {
       this.uiCompareViewHeaders = [
         {
