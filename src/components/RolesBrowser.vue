@@ -493,7 +493,7 @@ export default {
               includedPermissionsSize: item.includedPermissions.length,
               matchingPermissions: item.name in this.rolesAndMatchingPermissions ? this.rolesAndMatchingPermissions[item.name] : null,
               matchingPermissionsSize: item.name in this.rolesAndMatchingPermissions ? this.rolesAndMatchingPermissions[item.name].length : null,
-              missingPermissionsSize: item.name in this.rolesAndMatchingPermissions ? this.filteredPermissions.length - this.rolesAndMatchingPermissions[item.name].length: null
+              missingPermissionsSize: item.name in this.rolesAndMatchingPermissions ? this.filteredPermissions.length - this.rolesAndMatchingPermissions[item.name].length : null
             }
             return processed
           }, this)

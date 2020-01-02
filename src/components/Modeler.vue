@@ -456,6 +456,7 @@ export default {
     ...mapState(['activeRoleFilters',
       'loading',
       'filteredRoles',
+      'filteredPermissions',
       'info',
       'permissions',
       'roles',
@@ -513,6 +514,12 @@ export default {
           align: 'center',
           sortable: true,
           value: 'matchingPermissionsSize'
+        },
+        {
+          text: 'missing permissions',
+          align: 'center',
+          sortable: true,
+          value: 'missingPermissionsSize'
         },
         {
           text: '# of permissions',
@@ -695,7 +702,8 @@ export default {
               ...item,
               includedPermissionsSize: item.includedPermissions.length,
               matchingPermissions: item.name in this.rolesAndMatchingPermissions ? this.rolesAndMatchingPermissions[item.name] : null,
-              matchingPermissionsSize: item.name in this.rolesAndMatchingPermissions ? this.rolesAndMatchingPermissions[item.name].length : null
+              matchingPermissionsSize: item.name in this.rolesAndMatchingPermissions ? this.rolesAndMatchingPermissions[item.name].length : null,
+              missingPermissionsSize: item.name in this.rolesAndMatchingPermissions ? this.filteredPermissions.length - this.rolesAndMatchingPermissions[item.name].length : null
             }
             return processed
           }, this)
