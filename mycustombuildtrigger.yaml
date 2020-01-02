@@ -1,12 +1,12 @@
 steps:
 # Build the container image
 - name: 'us.gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'us.gcr.io/dev-site-jq/iamodeler:beta', '.']
+  args: ['build', '-t', 'us.gcr.io/$PROJECT_ID/$_IMAGE_NAME:$_TAG_NAME', '.']
 # Push the image to Container Registry
 - name: 'us.gcr.io/cloud-builders/docker'
-  args: ['push', 'us.gcr.io/dev-site-jq/iamodeler:beta']
+  args: ['push', 'us.gcr.io/$PROJECT_ID/$_IMAGE_NAME:$_TAG_NAME']
 # Deploy image to Cloud Run
 - name: 'us.gcr.io/cloud-builders/gcloud'
-  args: ['run', 'deploy', 'iamodeler', '--image', 'us.gcr.io/dev-site-jq/iamodeler:beta', '--region', '[REGION]', '--platform', 'managed', '--allow-unauthenticated']
+  args: ['run', 'deploy', '$_SERVICE_NAME', '--image', 'us.gcr.io/$PROJECT_ID/$_IMAGE_NAME:$_TAG_NAME', '--region', '[REGION]', '--platform', 'managed', '--allow-unauthenticated']
 images:
-- us.gcr.io/dev-site-jq/iamodeler:beta
+- us.gcr.io/$PROJECT_ID/$_IMAGE_NAME:$_TAG_NAME
