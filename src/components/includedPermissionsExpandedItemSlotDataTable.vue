@@ -1,7 +1,7 @@
 <template lang='pug'>
 v-card
   v-card-subtitle
-    v-icon mdi-key-plus
+    v-icon.px-2 mdi-key-plus
     | Included permissions
   v-card-text
     v-text-field(v-model='uiCompareViewExpandedSearch',
