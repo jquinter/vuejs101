@@ -4,14 +4,14 @@ div
     v-container#input-usage(fluid='')
       v-row
         v-col(cols='12', sm='4', md='7', align='center')
-          v-combobox(:value='activeRoleFilters',
-            @change='uiActiveRoleFiltersChange'
+          v-combobox(:value='activePermissionsFilters',
+            @change='uiActivePermissionsFiltersChange'
             :items='searchfilter',
             item-text='label',
             hide-no-data,
             chips='',
             clearable='',
-            label='Filtrar roles',
+            label='Filter permissions',
             hint='puede usar regexp y búsquedas parciales',
             persistent-hint='',
             multiple='',
@@ -28,91 +28,28 @@ div
                     strong {{ data.item.label }}
                 span {{data.item.value}}
 
-        v-col(cols='12', align='center',v-show='activeRoleFiltersPermissionsCSV')
-          v-expansion-panels
-            v-expansion-panel
-              v-expansion-panel-header
-                v-row
-                  v-col(cols='12', xs='12')
-                    h2 Rol personalizado
-                  v-col(cols='12', xs='12')
-                    span
-                      | Si no encuentra un rol adecuado para los permisos que busca, recuerde
-                      | que <a href='https://console.cloud.google.com/iam-admin/roles/create' target='_blank'>puede generar su propio rol</a>
-                      | usando este comando
-              v-expansion-panel-content
-                v-form
-                  v-row
-                    v-col(cols='12', md='6')
-                      v-text-field(v-model='uiCustomRoleName',
-                        outlined='',
-                        label='Nombre del rol personalizado',
-                        hint='Este es el formato usado como bigquery.admin en roles/bigquery.admin'
-                      )
-                    v-col(cols='12', xs='12', md='6')
-                      v-text-field(v-model='uiCustomRoleTitle',
-                        :rules='textFieldRulesMax(100)',
-                        counter='100',
-                        outlined='',
-                        label='Título del rol personalizado',
-                        hint='Este es un título legible (así como BigQuery Admin)'
-                      )
-                    v-col(cols='12', xs='12', md='6')
-                      v-text-field(v-model='uiCustomRoleDescription',
-                        :rules='textFieldRulesMaxNoSpaces(256)',
-                        counter='256',
-                        outlined='',
-                        label='Descripción del rol personalizado',
-                        hint='Esto es opcional, debería describir el propósito del rol'
-                      )
-                    v-col(cols='12', xs='12', md='6')
-                      v-text-field(v-model='uiCustomRoleProjectId',
-                        outlined='',
-                        label='Proyecto donde se creará el rol personalizado',
-                        hint='este es el identificador del proyecto de destino'
-                      )
-                  v-row
-                    v-col(cols='12', xs='12')
-                      kbd.text-left
-                        | gcloud iam roles create {{uiCustomRoleName?uiCustomRoleName:'ROLENAME'}} \
-                        pre &#9;--project {{uiCustomRoleProjectId?uiCustomRoleProjectId:'PROJECTID'}} \
-                        pre &#9;--title "{{uiCustomRoleTitle?uiCustomRoleTitle:"ROLETITLE"}}" \
-                        pre(v-show='uiCustomRoleDescription') &#9;--description "{{uiCustomRoleDescription?uiCustomRoleDescription:"ROLEDESCRIPTION"}}" \
-                        pre(v-show='activeRoleFiltersPermissionsCSV') &#9;--permissions {{activeRoleFiltersPermissionsCSV}} \
-                        pre &#9;--stage ALPHA
-                  v-row
-                    v-col(cols='12', xs='12')
-                      v-alert(v-model='uiCustomRoleWarning', type='warning', dense='', dismissible='', border='top')
-                        p.text-justify
-                          | To create a custom role, a caller must possess iam.roles.create permission.
-                          | By default, the owner of a project or an organization has this permission and can create and manage custom roles.
-                          | Users who are not owners, including organization admins, must be assigned either the Organization Role Administrator role, or the IAM Role Administrator role.
-                      .text-center
-                        v-btn(v-if='!uiCustomRoleWarning', @click='uiCustomRoleWarning = true', color='warning') ¿Qué necesito para correr este comando?
-        v-col(cols='6', sm='4', md='3', align='center')
+        v-col(cols='6', sm='8', md='5', align='center')
           v-switch.mt-2(v-model='uiIsCompareView', color='lime accent-3', :label='uiButtonSwitchViewText')
-        v-col(cols='6', sm='4', md='2', align='center')
-          v-switch.mt-2(v-model='uiCompareViewLeastPriviledgePrinciple', color='lime accent-3', label='Least Priviledge Principle')
 
     v-container(fluid='')
       transition-group.depth(name='gallery', tag='v-row')
         v-col(v-show='!uiIsCompareView',
-          v-for='(item, index) in uiCompareViewLeastPriviledgePrinciple ? leastPriviledgePrincipleFilteredRoles : filteredRoles',
+          v-for='(item, index) in filteredPermissions',
           :key='`key-${index}`',
-          v-if='rolesListItemShouldBeDisplayed(index)',
+          v-if='listItemShouldBeDisplayed(index)',
           cols='6',
           sm='6',
           md='3')
-          role(:role='item', :index='index+1', :query='activeRoleFilters')
+          permission(:item='item', :index='index+1', :query='activePermissionsFilters')
       v-row(dense='')
         v-col(v-show='uiIsCompareView')
           template
             v-data-table.elevation-1(:headers.sync='uiCompareViewHeaders',
               :mobile-breakpoint='800',
-              :value='filteredRoles'
+              :value='filteredPermissions'
               show-select='',
               @item-selected='uiCompareViewItemSelected',
-              :items='filteredRoles',
+              :items='filteredPermissions',
               item-key='name',
               :page.sync='uiPage',
               :items-per-page.sync='uiItemsPerPage',
@@ -123,30 +60,30 @@ div
               show-expand='',
               :expanded.sync='uiCompareViewExpanded',
               multi-sort='')
-              template(v-slot:top='', v-if='activeRoleFilters.length > 0')
+              template(v-slot:top='', v-if='activePermissionsFilters.length > 0')
                 v-toolbar(flat='')
                   v-toolbar-title(v-if='false') Roles
                   v-spacer
 
               template(v-slot:expanded-item='{ headers, item }')
                 td(:colspan='headers.length')
-                  expanded-item-permissions(:item='item', :activeRoleFilters='activeRoleFilters')
+                  expanded-item-permissions(:item='item', :activePermissionsFilters='activePermissionsFilters')
                   v-tooltip(right='', :light='true')
                     template(v-slot:activator='{ on }')
                       v-btn(fab='', small='', color='primary', @click='goToRoleDetail(item.name)', v-on='on')
                         v-icon(dark='') mdi-format-list-bulleted-square
                     span Ver detalles de {{item.name}}
 
-    v-divider.ma-12
-    infinite-loading.pa-12.ma-12(@infinite='loadMore',
+    v-divider.d-md-none.ma-12
+    infinite-loading.d-md-none.pa-12.ma-12(v-if='filteredPermissions.length > 0', @infinite='loadMore',
       ref="infiniteLoading",
       :distance='uiInfiniteLoadingDistance',
       force-use-infinite-wrapper='v-content__wrap')
       div(slot='no-more') No hay más datos
       div(slot='no-results') No hay datos
-  v-footer.d-none.d-sm-block(v-if='displayFooter', app='', padless='')
+  v-footer.d-none.d-md-block(v-if='displayFooter', app='', padless='')
     v-row.mt-2(align='center', justify='center')
-      v-col.d-none.d-sm-block(align='center', cols='12', md='3')
+      v-col.d-none.d-md-block(align='center', cols='12', md='3')
         div(v-show='!uiIsCompareView')
           span.grey--text Items per page
           v-menu(offset-y='')
@@ -165,21 +102,21 @@ div
         span.mr-4.grey--text(v-if='false')
           | Page {{ uiPage }} of {{ uiNumberOfPages }}
 
-      v-col.d-none.d-sm-block(align='center', cols='12', md='6')
+      v-col.d-none.d-md-block(align='center', cols='12', md='6')
         div(v-show='!uiIsCompareView')
           v-pagination(v-model='uiPage',
             color='lime darken-3',
             :length='uiNumberOfPages',
             :total-visible='9')
 
-      v-col.d-sm-none(align='center', cols='12', md='2')
+      v-col.d-md-none(align='center', cols='12', md='2')
         v-btn.mr-1(fab='', dark='', color='lime darken-3', @click='uiFormerPage')
           v-icon mdi-chevron-left
 
         v-btn.ml-1(fab='', dark='', color='lime darken-3', @click='uiNextPage')
           v-icon mdi-chevron-right
 
-      v-col(align='center', cols='12', md='1')
+      v-col(align='center', cols='12', md='3')
         v-chip(outlined='') © 2019
 </template>
 
@@ -195,7 +132,7 @@ export default {
   name: 'Browser',
 
   components: {
-    Role: lazyLoad('Role'),
+    Permission: lazyLoad('Permission'),
     expandedItemPermissions: lazyLoad('includedPermissionsExpandedItemSlotDataTable'),
     InfiniteLoading
   },
@@ -205,8 +142,7 @@ export default {
   },
 
   data: () => ({
-    uiActiveRoleFilters: [],
-    leastPriviledgePrincipleFilteredRoles: [],
+    uiActivePermissionsFilters: [],
     uiCustomRoleWarning: true,
     uiCustomRoleName: '',
     uiCustomRoleTitle: '',
@@ -218,7 +154,6 @@ export default {
     uiItemsPerPageArray: [4, 8, 12, -1],
     uiPage: 1,
     uiCompareViewSelected: [],
-    uiCompareViewLeastPriviledgePrinciple: false,
     uiCompareViewSortBy: ['name', 'title'],
     uiCompareViewSortDesc: [false, true],
     uiCompareViewFooterProps: {
@@ -273,7 +208,7 @@ export default {
       default:
         this.uiItemsPerPage = 8
     }
-    if (this.activeRoleFilters.length > 0) {
+    if (this.activePermissionsFilters.length > 0) {
       this.uiCompareViewHeaders = [
         {
           text: 'Name',
@@ -288,16 +223,10 @@ export default {
           value: 'title'
         },
         {
-          text: 'matching permissions',
+          text: 'included in roles',
           align: 'center',
           sortable: true,
-          value: 'matchingPermissionsSize'
-        },
-        {
-          text: '# of permissions',
-          align: 'center',
-          sortable: true,
-          value: 'includedPermissionsSize'
+          value: 'roles.length'
         },
         { text: '', value: 'data-table-expand' }
       ]
@@ -316,20 +245,30 @@ export default {
           value: 'title'
         },
         {
-          text: '# of permissions',
+          text: 'included in roles',
           align: 'center',
           sortable: true,
-          value: 'includedPermissions.length'
+          value: 'roles.length'
         },
         { text: '', value: 'data-table-expand' }
       ]
     }
   },
   computed: {
-    ...mapState(['activeRoleFilters', 'loading', 'filteredRoles', 'info', 'permissions', 'roles']),
+    ...mapState(['loading',
+      'filteredPermissions',
+      'info',
+      'permissions',
+      'permissionsRaw',
+      'roles'
+    ]),
+    activePermissionsFilters () {
+      return this.$store.state.activeRoleFilters
+    },
     uiInfiniteLoadingDistance () {
-      if (this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width)
+      if (this.$vuetify.breakpoint.height >= this.$vuetify.breakpoint.width) {
         return 10
+      }
       return 100
     },
     displayFooter () {
@@ -348,15 +287,7 @@ export default {
       return this.roles.concat(this.permissions)
     },
     uiNumberOfPages () {
-      return Math.ceil(this.filteredRoles.length / this.uiItemsPerPage)
-    },
-    activeRoleFiltersPermissionsCSV () {
-      return this.activeRoleFilters.filter(item => {
-        var regexp = new RegExp('^[a-zA-Z]{1,}\\.[a-zA-Z]{1,}\\.[a-zA-Z]{1,}', 'i')
-        return item && item.value && regexp.test(item.value)
-      })
-        .map(x => x.value)
-        .join()
+      return Math.ceil(this.filteredPermissions.length / this.uiItemsPerPage)
     }
   },
 
@@ -373,7 +304,7 @@ export default {
   },
 
   methods: {
-    uiActiveRoleFiltersChange (data) {
+    uiActivePermissionsFiltersChange (data) {
       this.$store.commit('setActiveRoleFilters', data)
     },
     uiCompareViewItemSelected (data) {
@@ -386,7 +317,7 @@ export default {
     goToRoleDetail (name) {
       this.$router.push({ name: 'role', params: { name } })
     },
-    rolesListItemShouldBeDisplayed (index) {
+    listItemShouldBeDisplayed (index) {
       switch (this.$vuetify.breakpoint.name) {
         case 'xs':
           return index < (this.uiPage) * this.uiItemsPerPage
@@ -460,79 +391,58 @@ export default {
       }
       this.$store.commit('setLoading', false)
     },
-    filterRoles () {
-      if (this.activeRoleFilters.length > 0) {
-        let matchingRoles = new Set()
+    filterPermissions () {
+      if (this.activePermissionsFilters.length > 0) {
+        let matchingPermissions = new Set()
         let partialMatching = []
-        for (let index = 0; index < this.activeRoleFilters.length; index++) {
-          /* for each role filter */
+        for (let index = 0; index < this.activePermissionsFilters.length; index++) {
+          /* for each permissions filter */
 
-          const filteringByRole = this.activeRoleFilters[index].value
+          const filteringByPermission = this.activePermissionsFilters[index].value
 
           /* Ampliación de filtro de búsqueda: podemos buscar por calce de codigo de rol */
-          if (filteringByRole.startsWith('roles/')) {
-            partialMatching = this.info.filter(item => {
-              var regexp = new RegExp(filteringByRole, 'gi')
-              return item && item.name && regexp.test(item.name)
+          if (filteringByPermission.startsWith('roles/')) {
+            /*
+            Primero: obtener, desde el set completo de permisos (permissionsRaw)
+            todos aquellos permisos que son incluidos en el rol que estamos buscando (filteringByPermission)
+            */
+            partialMatching = this.permissionsRaw.filter(item => {
+              // return item.name.toLowerCase().indexOf(filtering_by_role.toByRolee()) > -1
+              // console.log(item.name, item.includedPermissions.length, item.includedPermissions.some((element) => (element.toLowerCase().indexOf(filtering_by_role.toByRolee()) > -1)))
+              var regexp = new RegExp(filteringByPermission, 'gi')
+              return item && item.roles && item.roles.length &&
+                // item.roles.some((element) => (element.toLowerCase().indexOf(filtering_by_role.toByRolee()) > -1))
+                item.roles.some((element) => (regexp.test(element)))
             })
           } else {
             /* buscamos permisos puntuales */
-
-            /*
-            Primero: obtener, desde el set completo de roles (info)
-            todos aquellos roles que contienen el permiso que estamos buscando (filteringByRole)
-            */
-            partialMatching = this.info.filter(item => {
-              // return item.name.toLowerCase().indexOf(filtering_by_role.toByRolee()) > -1
-              // console.log(item.name, item.includedPermissions.length, item.includedPermissions.some((element) => (element.toLowerCase().indexOf(filtering_by_role.toByRolee()) > -1)))
-              var regexp = new RegExp(filteringByRole, 'gi')
-              return item && item.includedPermissions && item.includedPermissions.length &&
-                // item.includedPermissions.some((element) => (element.toLowerCase().indexOf(filtering_by_role.toByRolee()) > -1))
-                item.includedPermissions.some((element) => (regexp.test(element)))
+            partialMatching = this.permissionsRaw.filter(item => {
+              var regexp = new RegExp(filteringByPermission, 'gi')
+              return item && item.title && regexp.test(item.title)
             })
-
-            /*
-            Luego, desde este conjunto intermedio de roles,
-            extraemos los permisos aludidos en la busqueda
-            */
-            for (let index = 0; index < partialMatching.length; index++) {
-              const item = partialMatching[index]
-              var currentMatch = item.includedPermissions.filter(perm => {
-                var regexp = new RegExp(filteringByRole, 'gi')
-                return regexp.test(perm)
-              })
-              if (item.name in this.rolesAndMatchingPermissions) {
-                this.rolesAndMatchingPermissions[item.name] = [...this.rolesAndMatchingPermissions[item.name], ...currentMatch]
-                // deduplicating
-                this.rolesAndMatchingPermissions[item.name] = [...new Set(this.rolesAndMatchingPermissions[item.name])]
-              } else {
-                this.rolesAndMatchingPermissions[item.name] = currentMatch
-              }
-            }
           }
+
           /*
-          acá mantenemos un set de todos los posibles roles que se han encontrado
+          acá mantenemos un set de todos los posibles permisos que se han encontrado
           al usar los filtros de busqueda especificados
           */
-          partialMatching.forEach(role => matchingRoles.add(role))
-          let tempFilteredRoles = Array.from(matchingRoles).map(function (item) {
+          partialMatching.forEach(permission => matchingPermissions.add(permission))
+          /*
+          let tempFilteredPermissions = Array.from(matchingPermissions).map(function (item) {
             var processed = {
               ...item,
-              includedPermissionsSize: item.includedPermissions.length,
-              matchingPermissions: item.name in this.rolesAndMatchingPermissions ? this.rolesAndMatchingPermissions[item.name] : null,
-              matchingPermissionsSize: item.name in this.rolesAndMatchingPermissions ? this.rolesAndMatchingPermissions[item.name].length : null
             }
             return processed
           }, this)
-          this.$store.commit('setFilteredRoles', Object.freeze(tempFilteredRoles.slice()))
+          */
+          this.$store.commit('setFilteredPermissions', Object.freeze(Array.from(matchingPermissions).slice()))
         } /* for each role filter */
       } else {
-        this.$store.commit('setFilteredRoles', this.info)
+        this.$store.commit('setFilteredPermissions', this.permissionsRaw)
       }
     },
     remove (item) {
       this.$store.commit('removeFromActiveRoleFilters', item)
-      // this.activeRoleFilters = [...this.activeRoleFilters]
     },
     uiSwitchView () {
       if (this.uiIsCompareView) {
@@ -555,7 +465,7 @@ export default {
     }
   },
   watch: {
-    activeRoleFilters: function (newVal, oldVal) {
+    activePermissionsFilters: function (newVal, oldVal) {
       for (let index = 0; index < newVal.length; index++) {
         const element = newVal[index]
         if (typeof element === 'string') {
@@ -564,12 +474,9 @@ export default {
       }
 
       this.rolesAndMatchingPermissions = {}
-      this.filterRoles()
+      this.filterPermissions()
 
-      // console.log(this.uiIsCompareView, this.activeRoleFilters.length)
-
-      if (this.activeRoleFilters.length > 0) {
-        this.uiCompareViewLeastPriviledgePrinciple = true
+      if (this.activePermissionsFilters.length > 0) {
         this.uiCompareViewHeaders = [
           {
             text: 'Name',
@@ -621,47 +528,13 @@ export default {
         ]
       }
     },
-    uiCompareViewLeastPriviledgePrinciple: function (newVal, oldVal) {
-      if (newVal) {
-        if (this.activeRoleFilters.length > 0) {
-          this.uiCompareViewSortBy = ['includedPermissionsSize', 'name', 'title']
-          this.uiCompareViewSortDesc = [false, false, true]
-        } else {
-          this.uiCompareViewSortBy = ['includedPermissions.length', 'name', 'title']
-          this.uiCompareViewSortDesc = [false, false, true]
-        }
-        this.leastPriviledgePrincipleFilteredRoles = Object.assign([], this.filteredRoles.slice())
-        this.leastPriviledgePrincipleFilteredRoles = this.leastPriviledgePrincipleFilteredRoles.sort((a, b) => {
-          let first = Object.assign([], a.includedPermissions)
-          let second = Object.assign([], b.includedPermissions)
-          return (first.length > second.length) ? 1 : -1
-        })
-      } else {
-        this.uiCompareViewSortBy = ['name', 'title']
-        this.uiCompareViewSortDesc = [false, true]
-      }
-    },
-    filteredRoles: function (newVal, oldVal) {
-      // this.$store.commit('setFilteredRoles', newVal)
+    filteredPermissions: function (newVal, oldVal) {
       if (this.$refs.infiniteLoading) {
         // https://stackoverflow.com/questions/54044709/how-to-reset-a-vue-infinite-loading-element
         this.$refs.infiniteLoading.stateChanger.reset()
       }
-
-      this.leastPriviledgePrincipleFilteredRoles = Object.assign([], newVal.slice())
-      this.leastPriviledgePrincipleFilteredRoles = this.leastPriviledgePrincipleFilteredRoles.sort((a, b) => {
-        let first = Object.assign([], a.includedPermissions)
-        let second = Object.assign([], b.includedPermissions)
-        return (first.length > second.length) ? 1 : -1
-      })
     }
   }
-  /*
-    rolefilter: debounce(function (newVal) {
-      console.log('setting...')
-      this.debouncedrolefilter = newVal
-    }, 1500)
-  */
 }
 </script>
 

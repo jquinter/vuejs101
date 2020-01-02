@@ -13,9 +13,12 @@ const store = new Vuex.Store({
     activeRoleFilters: [],
     loading: false,
     filteredRoles: [],
+    filteredPermissions: [],
     info: [],
     permissions: [],
-    roles: []
+    permissionsRaw: [],
+    roles: [],
+    uiCompareViewLeastPriviledgePrinciple: false
   },
   plugins: [persistedState],
   mutations: {
@@ -36,14 +39,23 @@ const store = new Vuex.Store({
     setFilteredRoles (state, filteredRoles) {
       state.filteredRoles = filteredRoles
     },
+    setFilteredPermissions (state, filteredPermissions) {
+      state.filteredPermissions = filteredPermissions
+    },
     setInfo (state, info) {
       state.info = info
     },
     setPermissions (state, permissions) {
       state.permissions = permissions
     },
+    setPermissionsRaw (state, permissions) {
+      state.permissionsRaw = permissions
+    },
     setRoles (state, roles) {
       state.roles = roles
+    },
+    setUiCompareViewLeastPriviledgePrinciple (state, value) {
+      state.uiCompareViewLeastPriviledgePrinciple = value
     }
   }
 })

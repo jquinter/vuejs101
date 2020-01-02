@@ -76,7 +76,7 @@ module.exports = {
       new TerserPlugin({
         TerserOptions: {
           compress: {
-            drop_console: true
+            drop_console: isProd
           },
           ecma: undefined,
           warnings: false,

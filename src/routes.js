@@ -3,8 +3,10 @@ function lazyLoad (view) {
 }
 
 const routes = [
-  { path: '/', component: lazyLoad('Browser'), name: 'home' },
-  { path: '/browser', component: lazyLoad('Browser'), name: 'browser' },
+  { path: '/', component: lazyLoad('RolesBrowser'), name: 'home' },
+  { path: '/settings', component: lazyLoad('Settings'), name: 'settings' },
+  { path: '/roles', component: lazyLoad('RolesBrowser'), name: 'roles' },
+  { path: '/permissions', component: lazyLoad('PermissionsBrowser'), name: 'permissions' },
   { path: '/modeler', component: lazyLoad('Modeler'), name: 'modeler' },
   { path: '/roles/:name', component: lazyLoad('RoleDetail'), name: 'role' }
 ]

@@ -43,7 +43,9 @@ v-content
             v-stepper-content(step='2')
               v-card.mb-12(color='')
                 v-card-text
-                  v-checkbox(v-model='uiCompareViewLeastPriviledgePrinciple', color='lime accent-3', label='Apply Least Priviledge Principle on suggestions ordering')
+                  v-checkbox(v-model='lpp',
+                    color='lime accent-3',
+                    label='Apply Least Priviledge Principle on suggestions ordering')
               v-btn(color='primary', @click='modelerStage = 3')
                 | Go to suggestions
               v-btn(text='', @click='modelerStage = 1') Pick permissions
@@ -162,13 +164,51 @@ v-content
                                     v-icon(dark='') mdi-format-list-bulleted-square
                                 span Ver detalles de {{item.name}}
 
-                v-divider.ma-12
-                infinite-loading.d-sm-none.pa-12.ma-12(@infinite='loadMore',
+                v-divider.d-md-none.ma-12
+                infinite-loading.d-md-none.pa-12.ma-12(@infinite='loadMore',
                   ref="infiniteLoading",
                   :distance='uiInfiniteLoadingDistance',
                   force-use-infinite-wrapper='v-content__wrap')
                   div(slot='no-more') No hay más datos
                   div(slot='no-results') No hay datos
+
+                v-card-text.d-none.d-md-block
+                  v-row.mt-2(align='center', justify='center')
+                    v-col.d-none.d-md-block(align='center', cols='12', md='3')
+                      div(v-show='!uiIsCompareView')
+                        span.grey--text Items per page
+                        v-menu(offset-y='')
+                          template(v-slot:activator='{ on }')
+                            v-btn.ml-2(dark='', text='', color='lime darken-1', v-on='on')
+                              | {{ uiItemsPerPage }}
+                              v-icon mdi-chevron-down
+                          v-list
+                            v-list-item(v-for='(number, index) in uiItemsPerPageArray',
+                              :key='index',
+                              @click='uiUpdateItemsPerPage(number)')
+                              v-list-item-title {{ number }}
+
+                      v-spacer
+
+                      span.mr-4.grey--text(v-if='false')
+                        | Page {{ uiPage }} of {{ uiNumberOfPages }}
+
+                    v-col.d-none.d-md-block(align='center', cols='12', md='6')
+                      div(v-show='!uiIsCompareView')
+                        v-pagination(v-model='uiPage',
+                          color='lime darken-3',
+                          :length='uiNumberOfPages',
+                          :total-visible='9')
+
+                    v-col.d-md-none(align='center', cols='12', md='2')
+                      v-btn.mr-1(fab='', dark='', color='lime darken-3', @click='uiFormerPage')
+                        v-icon mdi-chevron-left
+
+                      v-btn.ml-1(fab='', dark='', color='lime darken-3', @click='uiNextPage')
+                        v-icon mdi-chevron-right
+
+                    v-col(align='center', cols='12', md='3')
+                      v-chip(outlined='') © 2019
 
               v-btn(color='primary', @click='modelerStage = 1')
                 | Pick permissions
@@ -298,9 +338,8 @@ v-content
                       v-for='(item, index) in uiCompareViewLeastPriviledgePrinciple ? leastPriviledgePrincipleFilteredRoles : filteredRoles',
                       :key='`key-${index}`',
                       v-if='rolesListItemShouldBeDisplayed(index)',
-                      cols='6',
-                      sm='6',
-                      md='3')
+                      cols='12',
+                      sm='6')
                       role(:role='item', :index='index+1', :query='activeRoleFilters')
                   v-row(dense='')
                     v-col(v-show='uiIsCompareView')
@@ -338,8 +377,8 @@ v-content
                                     v-icon(dark='') mdi-format-list-bulleted-square
                                 span Ver detalles de {{item.name}}
 
-                v-divider.ma-12
-                infinite-loading.d-sm-none.pa-12.ma-12(@infinite='loadMore',
+                v-divider.d-md-none.ma-12
+                infinite-loading.d-md-none.pa-12.ma-12(@infinite='loadMore',
                   ref="infiniteLoading",
                   :distance='uiInfiniteLoadingDistance',
                   force-use-infinite-wrapper='v-content__wrap')
@@ -375,7 +414,6 @@ export default {
     uiCustomRoleDescription: '',
     uiCustomRoleProjectId: '',
     uiCompareViewSelected: [],
-    uiCompareViewLeastPriviledgePrinciple: false,
     uiCompareViewSortBy: ['name', 'title'],
     uiCompareViewSortDesc: [false, true],
     uiCompareViewFooterProps: {
@@ -410,11 +448,28 @@ export default {
     uiItemsPerPage: 4,
     uiItemsPerPageArray: [4, 8, 12, -1],
     uiPage: 1,
-    rolesAndMatchingPermissions: {}
+    rolesAndMatchingPermissions: {},
+    leastPriviledgePrincipleFilteredRoles: []
   }),
 
   computed: {
-    ...mapState(['activeRoleFilters', 'loading', 'filteredRoles', 'info', 'permissions', 'roles']),
+    ...mapState(['activeRoleFilters',
+      'loading',
+      'filteredRoles',
+      'info',
+      'permissions',
+      'roles',
+      'uiCompareViewLeastPriviledgePrinciple'
+    ]),
+    lpp: {
+      // https://itnext.io/anyway-this-is-how-to-use-v-model-with-vuex-computed-setter-in-action-320eb682c976
+      set (value) {
+        this.$store.commit('setUiCompareViewLeastPriviledgePrinciple', value)
+      },
+      get () {
+        return this.uiCompareViewLeastPriviledgePrinciple
+      }
+    },
     searchfilter () {
       return this.permissions
     },
@@ -432,6 +487,13 @@ export default {
   },
 
   mounted () {
+    this.leastPriviledgePrincipleFilteredRoles = Object.assign([], this.filteredRoles.slice())
+    this.leastPriviledgePrincipleFilteredRoles = this.leastPriviledgePrincipleFilteredRoles.sort((a, b) => {
+      let first = Object.assign([], a.includedPermissions)
+      let second = Object.assign([], b.includedPermissions)
+      return (first.length > second.length) ? 1 : -1
+    })
+
     if (this.activeRoleFilters.length > 0) {
       this.uiCompareViewHeaders = [
         {
@@ -502,6 +564,8 @@ export default {
     rolesListItemShouldBeDisplayed (index) {
       switch (this.$vuetify.breakpoint.name) {
         case 'xs':
+          return index < (this.uiPage) * this.uiItemsPerPage
+        case 'sm':
           return index < (this.uiPage) * this.uiItemsPerPage
         default:
           return index >= (this.uiPage - 1) * this.uiItemsPerPage && index < (this.uiPage) * this.uiItemsPerPage
@@ -677,7 +741,7 @@ export default {
       this.rolesAndMatchingPermissions = {}
       this.filterRoles()
     },
-    uiCompareViewLeastPriviledgePrinciple: function (newVal, oldVal) {
+    lpp: function (newVal, oldVal) {
       if (newVal) {
         if (this.activeRoleFilters.length > 0) {
           this.uiCompareViewSortBy = ['includedPermissionsSize', 'name', 'title']

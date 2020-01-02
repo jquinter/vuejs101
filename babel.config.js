@@ -1,6 +1,9 @@
+const isProd = process.env.NODE_ENV === "production"
 const plugins = []
 plugins.push(['@babel/plugin-proposal-object-rest-spread', { 'loose': true, 'useBuiltIns': true }])
-plugins.push("transform-remove-console")
+if (isProd) {
+  plugins.push("transform-remove-console")
+}
 plugins.push("@babel/plugin-transform-regenerator")
 // if(process.env.NODE_ENV === 'production') {
 //   plugins.push("transform-remove-console")

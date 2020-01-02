@@ -2,17 +2,22 @@
 v-app#inspire
   v-navigation-drawer(v-model='drawer', app='', clipped='')
     v-list(dense='')
-      v-list-item(link='', @click='goTo("browser")')
+      v-list-item(link='', @click='goTo("roles")')
         v-list-item-action
-          v-icon mdi-format-list-bulleted-square
+          v-icon mdi-shield-account
         v-list-item-content
-          v-list-item-title Browser
+          v-list-item-title Roles
+      v-list-item(link='', @click='goTo("permissions")')
+        v-list-item-action
+          v-icon mdi-key-plus
+        v-list-item-content
+          v-list-item-title Permissions
       v-list-item(link='', @click='goTo("modeler")')
         v-list-item-action
           v-icon mdi-view-dashboard
         v-list-item-content
           v-list-item-title Modeler
-      v-list-item(link='')
+      v-list-item(link='', @click='goTo("settings")')
         v-list-item-action
           v-icon mdi-settings
         v-list-item-content
@@ -32,9 +37,13 @@ v-app#inspire
         | {{filteredRoles.length}}/
       span(v-if="info && info.length>0")
         | {{info.length}}
-    v-btn(v-if="permissions && permissions.length>0", @click='uiSnackbarPermissions = true')
+    v-btn(@click='uiSnackbarPermissions = true')
       v-icon mdi-key-plus
-      | {{permissions.length}}
+      span(v-if="info && info.length>filteredPermissions.length")
+        | {{filteredPermissions.length}}/
+      span(v-if="permissions && permissions.length>0")
+        | {{permissions.length}}
+
     my-toolbar-progress-bar(:loading='loading', color='lime accent-3', slot='extension')
   router-view
 
@@ -48,7 +57,12 @@ v-app#inspire
     v-btn(icon='', @click='uiSnackbarRoles = false')
       v-icon mdi-window-close
   v-snackbar(v-model='uiSnackbarPermissions', left='', top='', vertical='')
-    | Hay {{permissions.length}} permisos
+    | Hay
+    span(v-if="info && info.length>filteredPermissions.length")
+      | {{filteredPermissions.length}}/
+    span(v-if="permissions && permissions.length>0")
+      | {{permissions.length}}
+    | permisos
     v-btn(icon='', @click='uiSnackbarPermissions = false')
       v-icon mdi-window-close
 </template>
@@ -70,7 +84,15 @@ export default {
   }),
 
   computed: {
-    ...mapState(['activeRoleFilters', 'loading', 'filteredRoles', 'info', 'permissions', 'roles'])
+    ...mapState(['activeRoleFilters',
+      'activePermissionsFilters',
+      'loading',
+      'filteredRoles',
+      'filteredPermissions',
+      'info',
+      'permissions',
+      'permissionsRaw',
+      'roles'])
   },
 
   methods: {
@@ -84,15 +106,29 @@ export default {
 
     var dataUrl = '/data/roles_detailed.json'
 
-    this.$store.commit('setLoading', true)
+    this.$store.commit('setLoading',
+      true)
     const rolesRaw = await axios.get(dataUrl)
-    this.$store.commit('setInfo', Object.freeze(rolesRaw.data.slice()))
+    this.$store.commit('setInfo',
+      Object.freeze(rolesRaw.data.slice()))
     if (this.activeRoleFilters.length === 0) {
       this.$store.commit('setFilteredRoles', Object.freeze(rolesRaw.data.slice()))
     }
     this.$store.commit('setRoles', Object.freeze(rolesRaw.data.slice()).map(x => ({ 'value': x.name, 'label': x.title })))
 
     const permissionsRaw = await axios.get('/data/permissions_roles.json')
+    this.$store.commit('setPermissionsRaw', Object.freeze(permissionsRaw.data.slice()).map(x => ({
+      'title': x.permission,
+      'label': x.permission.split('.').join(' '),
+      'roles': x.roles
+    })))
+    if (this.activePermissionsFilters.length === 0) {
+      this.$store.commit('setFilteredPermissions', Object.freeze(permissionsRaw.data.slice()).map(x => ({
+        'title': x.permission,
+        'label': x.permission.split('.').join(' '),
+        'roles': x.roles
+      })))
+    }
     this.$store.commit('setPermissions', Object.freeze(permissionsRaw.data.slice()).map(x => ({ 'value': x.permission, 'label': x.permission })))
     this.$store.commit('setLoading', false)
   }

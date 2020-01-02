@@ -9,21 +9,14 @@ div
       div
         v-row
           v-col(cols='8', sm='9')
-            | {{role.title}}
-          v-col(cols='4', sm='3')
-            v-tooltip(right='', :light='true')
-              template(v-slot:activator='{ on }')
-                v-btn(fab='', small='', color='primary', @click='goToRoleDetail(role.name)', v-on='on')
-                  v-icon(dark='') mdi-format-list-bulleted-square
-              span Ver detalles de {{role.name}}
+            | {{item.label}}
     v-card-subtitle
-      | {{role.description}}
+      | {{item.title}}
     v-card-text
-      v-chip(color='primary')
+      v-chip.ma-2(color='primary')
         v-avatar(left='')
-          v-icon mdi-key-plus
-        span(v-if='(role && role.matchingPermissions)') {{role.matchingPermissions.length}}/
-        span(v-if='(role && role.includedPermissions)') {{role.includedPermissions.length}}
+            v-icon mdi-shield-account
+        span(v-if='(item && item.roles)') {{item.roles.length}}
         span(v-else='') 0
 
   v-overlay(:value='overlay', opacity='0.8')
@@ -37,20 +30,14 @@ div
       elevation='12'
       :raised='true'
       :ripple='false')
-      v-card-subtitle.font-italic.font-weight-bold {{role.name}}
+      v-card-subtitle.font-italic.font-weight-bold {{item.title}}
 
       v-card-text
-        p.display-1.text--primary {{role.title}}
-        .text--primary {{role.description}}
+        p.display-1.text--primary {{item.label}}
 
-      expanded-item-permissions(:item='role', :activeRoleFilters='query')
+      expanded-item-permissions(:item='item', :activeRoleFilters='query')
 
       v-card-actions.d-flex.flex-row.justify-center
-        v-tooltip(bottom='', :light='true')
-          template(v-slot:activator='{ on }')
-            v-btn.mx-2(fab='', small='', color='primary', @click='goToRoleDetail(role.name)', v-on='on')
-              v-icon(dark='') mdi-format-list-bulleted-square
-          span Ver detalles de {{role.name}}
         v-tooltip(bottom='', :light='true')
           template(v-slot:activator='{ on }')
             v-btn.mx-2(fab='', small='', color='primary', @click='overlay = false', v-on='on')
@@ -64,10 +51,10 @@ function lazyLoad (view) {
 }
 
 export default {
-  name: 'Role',
+  name: 'Permission',
 
   components: {
-    expandedItemPermissions: lazyLoad('includedPermissionsExpandedItemSlotDataTable')
+    expandedItemPermissions: lazyLoad('associatedRolesExpandedItemSlotDataTable')
   },
 
   computed: {
@@ -85,18 +72,12 @@ export default {
     overlay: false
   }),
 
-  methods: {
-    goToRoleDetail (name) {
-      this.$router.push({ name: 'role', params: { name } })
-    }
-  },
-
   props: {
     index: {
       type: Number,
       required: true
     },
-    role: {
+    item: {
       type: Object,
       required: true
     },
