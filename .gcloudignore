@@ -3,4 +3,5 @@
 # files from your .gitignore file, remove the corresponding line below:
 .git
 .gitignore
-!/dist/data\
+
+#!include:.gitignore
