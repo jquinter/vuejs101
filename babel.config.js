@@ -4,8 +4,7 @@ plugins.push(['@babel/plugin-proposal-object-rest-spread', { 'loose': true, 'use
 plugins.push('@babel/plugin-transform-regenerator')
 module.exports = {
   presets: [
-    // '@vue/cli-plugin-babel/preset',
-    [ '@vue/app', { 'useBuiltIns': 'entry' } ]
+    [ '@vue/cli-plugin-babel/preset', { 'useBuiltIns': 'entry' } ]
   ],
   plugins: plugins
 }
