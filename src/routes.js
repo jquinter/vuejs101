@@ -8,6 +8,7 @@ const routes = [
   { path: '/roles', component: lazyLoad('RolesBrowser'), name: 'roles' },
   { path: '/permissions', component: lazyLoad('PermissionsBrowser'), name: 'permissions' },
   { path: '/modeler', component: lazyLoad('Modeler'), name: 'modeler' },
-  { path: '/roles/:name', component: lazyLoad('RoleDetail'), name: 'role' }
+  { path: '/roles/:name', component: lazyLoad('RoleDetail'), name: 'role' },
+  { path: '/permissions/:name', component: lazyLoad('PermissionDetail'), name: 'permission' }
 ]
 export default routes

@@ -23,9 +23,11 @@ v-row(no-gutters='')
           tr
             td.px-0(v-if='uiCompareViewExpandedSearch')
               v-btn(small='', text='', @click='goToRoleDetail(item.name)')
+                v-icon.pr-1 mdi-shield-account
                 span(v-html='$options.filters.highlight(item.name, uiCompareViewExpandedSearch)')
             td.px-0(v-else='')
               v-btn(small='', text='', @click='goToRoleDetail(item.name)')
+                v-icon.pr-1 mdi-shield-account
                 span(v-html='$options.filters.highlightRegExp(item.name, activeRoleFilters)')
 </template>
 <script>
