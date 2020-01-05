@@ -22,8 +22,14 @@ v-row(no-gutters='')
         )
           template(v-slot:item='{ item }')
             tr
-              td(v-if='uiCompareViewExpandedSearch', v-html='$options.filters.highlight(item.name, uiCompareViewExpandedSearch)')
-              td(v-else='', v-html='$options.filters.highlightRegExp(item.name, activeRoleFilters)')
+              td.px-0(v-if='uiCompareViewExpandedSearch')
+                v-btn(small='', text='', @click='goToPermissionDetail(item.name)')
+                  v-icon.pr-1 mdi-key-plus
+                  span(v-html='$options.filters.highlight(item.name, uiCompareViewExpandedSearch)')
+              td.px-0(v-else='')
+                v-btn(small='', text='', @click='goToPermissionDetail(item.name)')
+                  v-icon.pr-1 mdi-key-plus
+                  span(v-html='$options.filters.highlightRegExp(item.name, activeRoleFilters)')
 </template>
 <script>
 export default {
@@ -39,6 +45,9 @@ export default {
       return arrayData.map(function (item) {
         return { name: item, value: item }
       }, this)
+    },
+    goToPermissionDetail (name) {
+      this.$router.push({ name: 'permission', params: { name } })
     }
   },
 
