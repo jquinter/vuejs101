@@ -1,6 +1,38 @@
 <template lang='pug'>
 v-app#inspire
-  v-navigation-drawer(v-model='drawer', app='', clipped='')
+
+  v-app-bar(app='',
+    clipped-left='',
+    extension-height='0',
+    fixed,
+    hide-on-scroll
+    )
+    v-app-bar-nav-icon(@click.stop='drawer = !drawer')
+    v-toolbar-title IAModeler
+    v-spacer
+    v-btn(@click='uiSnackbarRoles = true')
+      v-icon mdi-shield-account
+      span(v-if="info && info.length>filteredRoles.length")
+        | {{filteredRoles.length}}/
+      span(v-if="info && info.length>0")
+        | {{info.length}}
+    v-btn(@click='uiSnackbarPermissions = true')
+      v-icon mdi-key-plus
+      span(v-if="info && info.length>filteredPermissions.length")
+        | {{filteredPermissions.length}}/
+      span(v-if="permissions && permissions.length>0")
+        | {{permissions.length}}
+
+    my-toolbar-progress-bar(:loading='loading', color='lime accent-3', slot='extension')
+
+  v-navigation-drawer(v-model='drawer',
+    app='',
+    clipped='',
+    :mini-variant.sync='mini')
+    v-btn(icon="" @click.stop="mini = !mini")
+      v-icon(v-if='mini') mdi-chevron-right
+      v-icon(v-else='') mdi-chevron-left
+    v-divider
     v-list(dense='')
       v-list-item(link='', @click='goTo("roles")')
         v-list-item-action
@@ -22,29 +54,7 @@ v-app#inspire
           v-icon mdi-settings
         v-list-item-content
           v-list-item-title Settings
-  v-app-bar(app='',
-    clipped-left='',
-    extension-height='0',
-    fixed,
-    overflow
-    )
-    v-app-bar-nav-icon(@click.stop='drawer = !drawer')
-    v-toolbar-title IAModeler
-    v-spacer
-    v-btn(@click='uiSnackbarRoles = true')
-      v-icon mdi-shield-account
-      span(v-if="info && info.length>filteredRoles.length")
-        | {{filteredRoles.length}}/
-      span(v-if="info && info.length>0")
-        | {{info.length}}
-    v-btn(@click='uiSnackbarPermissions = true')
-      v-icon mdi-key-plus
-      span(v-if="info && info.length>filteredPermissions.length")
-        | {{filteredPermissions.length}}/
-      span(v-if="permissions && permissions.length>0")
-        | {{permissions.length}}
 
-    my-toolbar-progress-bar(:loading='loading', color='lime accent-3', slot='extension')
   router-view
 
   v-snackbar(v-model='uiSnackbarRoles', left='', top='', vertical='')
@@ -78,12 +88,16 @@ export default {
   components: { MyToolbarProgressBar },
 
   data: () => ({
-    drawer: false,
+    drawer: null,
+    mini: false,
     uiSnackbarRoles: false,
     uiSnackbarPermissions: false
   }),
 
   computed: {
+    breakpoint () {
+      return process.env.NODE_ENV === 'production' ? '' : `${this.$vuetify.breakpoint.name} (${this.$vuetify.breakpoint.width}X${this.$vuetify.breakpoint.height})`
+    },
     ...mapState([
       'activeRoleFilters',
       'loading',
