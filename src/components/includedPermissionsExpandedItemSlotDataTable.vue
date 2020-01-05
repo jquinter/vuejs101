@@ -8,9 +8,7 @@ v-row(no-gutters='')
     )
   v-col(cols='12')
     v-card.overflow-y-auto(
-      dark='',
-      max-width='90vw',
-      max-height='60vh')
+      dark='')
       v-card-text
         v-data-table(
           hide-default-header=''

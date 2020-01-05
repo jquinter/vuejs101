@@ -3,30 +3,26 @@ div
   v-card.mx-auto(max-width='344',
     elevation='12',
     :raised='true',
-    :ripple='true',
-    @click='uiOrientationLandscape ? overlay = overlay : overlay = !overlay')
-    v-card-title.word-wrapped
-      div
-        v-row
-          v-col(cols='8', sm='9')
-            | {{role.title}}
-          v-col(cols='4', sm='3')
-            v-tooltip(right='', :light='true')
-              template(v-slot:activator='{ on }')
-                v-btn(fab='', small='', color='primary', @click='goToRoleDetail(role.name)', v-on='on')
-                  v-icon(dark='') mdi-format-list-bulleted-square
-              span Ver detalles de {{role.name}}
-    v-card-subtitle
-      | {{role.description}}
-    v-card-text
-      v-chip(color='primary')
-        v-avatar(left='')
-          v-icon mdi-key-plus
-        span(v-if='(role && role.matchingPermissions)') {{role.matchingPermissions.length}}/
-        span(v-if='(role && role.includedPermissions)') {{role.includedPermissions.length}}
-        span(v-else='') 0
+    :ripple='true')
+    v-card-title.word-wrapped {{role.title}}
+    v-card-subtitle {{role.description}}
+    v-card-actions
+      v-row
+        v-col(cols="12")
+          v-btn.mr-1(color='primary', @click='overlay = !overlay')
+            v-icon(left='') mdi-key-plus
+            span(v-if='(role && role.matchingPermissions)') {{role.matchingPermissions.length}}/
+            span(v-if='(role && role.includedPermissions)') {{role.includedPermissions.length}}
+            span(v-else='') 0
+        v-col(cols="12")
+          v-tooltip(right='', :light='true')
+            template(v-slot:activator='{ on }')
+              v-btn(color='primary', @click='goToRoleDetail(role.name)', v-on='on')
+                v-icon(left='') mdi-format-list-bulleted-square
+                | Detalles
+            span Ver detalles de {{role.name}}
 
-  v-overlay(:value='overlay', opacity='0.8')
+  v-dialog(v-model='overlay', opacity='0.8', :fullscreen='uiOrientationLandscape')
     v-card(
       v-touch='{\
         left: () => (overlay = false),\
@@ -37,14 +33,16 @@ div
       elevation='12'
       :raised='true'
       :ripple='false')
-      v-card-subtitle.font-italic.font-weight-bold {{role.name}}
+      v-toolbar(dark='', color='primary')
+        v-btn(icon='', dark='', @click='overlay = false')
+          v-icon mdi-close
+        v-card-subtitle.font-italic.font-weight-bold {{role.name}}
 
       v-card-text
-        small Swipe to dismiss/close
+        p.caption.text-right (Swipe to dismiss/close)
         p.display-1.text--primary {{role.title}}
         .text--primary {{role.description}}
-
-      expanded-item-permissions(:item='role', :activeRoleFilters='query')
+        expanded-item-permissions(:item='role', :activeRoleFilters='query')
 
       v-card-actions.d-flex.flex-row.justify-center
         v-tooltip(bottom='', :light='true')
