@@ -1,15 +1,13 @@
 <template lang='pug'>
 v-content
   v-container
-    v-btn.mx-auto(small='', color='secondary', @click='goTo("home")') Volver al listado
+    v-btn.mx-auto(small='', color='primary', @click='goTo("roles")') Volver al listado de roles
 
     v-row
       v-col(cols='12', md='8', align='justify')
         v-card.mx-auto(v-if='role', elevation='12', :raised='true', :ripple='true')
-          v-card-title.word-wrapped(@click='goToRoleDetail(role.name)')
-            | {{role.title}}
-          v-card-subtitle.caption
-            | {{role.name}}
+          v-card-title.word-wrapped {{role.title}}
+          v-card-subtitle.caption {{role.name}}
           v-card-text
             v-chip(label='')
               v-avatar(left='')
