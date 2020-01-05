@@ -19,7 +19,7 @@ div
         span(v-if='(item && item.roles)') {{item.roles.length}}
         span(v-else='') 0
 
-  v-overlay(:value='overlay', opacity='0.8')
+  v-dialog(v-model='overlay', opacity='0.8', :fullscreen='uiOrientationLandscape')
     v-card(
       v-touch='{\
         left: () => (overlay = false),\
@@ -30,13 +30,15 @@ div
       elevation='12'
       :raised='true'
       :ripple='false')
-      v-card-subtitle.font-italic.font-weight-bold {{item.title}}
+      v-toolbar(dark='', color='primary')
+        v-btn(icon='', dark='', @click='overlay = false')
+          v-icon mdi-close
+        v-card-subtitle.font-italic.font-weight-bold {{item.title}}
 
       v-card-text
+        p.caption.text-right (Swipe to dismiss/close)
         p.display-1.text--primary {{item.label}}
-        small Swipe to dismiss/close
-
-      expanded-item-permissions(:item='item', :activeRoleFilters='query')
+        expanded-item-permissions(:item='item', :activeRoleFilters='query')
 
       v-card-actions.d-flex.flex-row.justify-center
         v-tooltip(bottom='', :light='true')
@@ -59,6 +61,9 @@ export default {
   },
 
   computed: {
+    uiOrientationLandscape () {
+      return this.$vuetify.breakpoint.height < this.$vuetify.breakpoint.width
+    },
     recommendedOverlayWidth () {
       switch (this.$vuetify.breakpoint.name) {
         case 'xs':

@@ -1,37 +1,32 @@
 <template lang='pug'>
-v-card
-  v-card-subtitle
-    v-icon.px-2 mdi-shield-account
-    | Included in these roles
-  v-card-text
-    v-row(justify='end')
-      v-col(cols=10, md=6)
-        v-text-field(v-model='uiCompareViewExpandedSearch',
-          append-icon='search',
-          label='Filter roles list',
-          clearable=''
-        )
-  v-card.overflow-y-auto(
-    dark='',
-    max-width='90vw',
-    max-height='60vh')
-    v-data-table(
-      :dense='false'
-      :dark='true'
-      :headers="[{text: 'role name', sortable: true, value: 'name'}]"
-      :items-per-page="5"
-      :items="generateData(item.roles)"
-      :search='uiCompareViewExpandedSearch'
+v-row(no-gutters='')
+  v-col(cols='10', offset='2')
+    v-text-field(v-model='uiCompareViewExpandedSearch',
+      append-icon='search',
+      label='Filter roles list',
+      clearable=''
     )
-      template(v-slot:item='{ item }')
-        tr
-          td(v-if='uiCompareViewExpandedSearch')
-            v-btn.mx-2(small='', text='', @click='goToRoleDetail(item.name)')
-              span(v-html='$options.filters.highlight(item.name, uiCompareViewExpandedSearch)')
-          td(v-else='')
-            v-btn.mx-2(small='', text='', @click='goToRoleDetail(item.name)')
-              span(v-html='$options.filters.highlightRegExp(item.name, activeRoleFilters)')
-          td
+  v-col(cols='12')
+    v-card.overflow-y-auto(
+      dark='')
+      v-data-table(
+        hide-default-header=''
+        :hide-default-footer='item.roles.length <= 5'
+        :dense='false'
+        :dark='true'
+        :headers="[{text: 'role name', sortable: true, value: 'name'}]"
+        :items-per-page="5"
+        :items="generateData(item.roles)"
+        :search='uiCompareViewExpandedSearch'
+      )
+        template(v-slot:item='{ item }')
+          tr
+            td.px-0(v-if='uiCompareViewExpandedSearch')
+              v-btn(small='', text='', @click='goToRoleDetail(item.name)')
+                span(v-html='$options.filters.highlight(item.name, uiCompareViewExpandedSearch)')
+            td.px-0(v-else='')
+              v-btn(small='', text='', @click='goToRoleDetail(item.name)')
+                span(v-html='$options.filters.highlightRegExp(item.name, activeRoleFilters)')
 </template>
 <script>
 export default {
@@ -65,3 +60,8 @@ export default {
   }
 }
 </script>
+<style scoped>
+.v-data-table >>> .v-data-footer .v-data-footer__pagination {
+  margin: 1px !important;
+}
+</style>

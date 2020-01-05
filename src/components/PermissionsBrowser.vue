@@ -67,7 +67,12 @@ div
 
               template(v-slot:expanded-item='{ headers, item }')
                 td(:colspan='headers.length')
-                  expanded-item-permissions(:item='item', :activePermissionsFilters='activePermissionsFilters')
+                  v-card
+                    v-card-subtitle
+                      v-icon.px-2 mdi-shield-account
+                      | Included in these roles
+                    v-card-text
+                      expanded-item-permissions(:item='item', :activePermissionsFilters='activePermissionsFilters')
                   v-tooltip(right='', :light='true')
                     template(v-slot:activator='{ on }')
                       v-btn(fab='', small='', color='primary', @click='goToRoleDetail(item.name)', v-on='on')
