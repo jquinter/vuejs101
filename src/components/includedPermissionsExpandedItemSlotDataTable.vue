@@ -1,33 +1,31 @@
 <template lang='pug'>
-v-card
-  v-card-subtitle
-    v-icon.px-2 mdi-key-plus
-    | Included permissions
-  v-card-text
+v-row(no-gutters='')
+  v-col(cols='10', offset='2')
     v-text-field(v-model='uiCompareViewExpandedSearch',
       append-icon='search',
       label='Filtrar lista de permisos',
       clearable=''
     )
-  v-card.overflow-y-auto(
-    dark='',
-    max-width='90vw',
-    max-height='60vh')
-    v-data-table(
-      :dense='false'
-      :dark='true'
-      :headers="[{text: 'permission name', sortable: true, value: 'name'}, {text: 'mayor', value: 'mayor', sortable: false}]"
-      :group-by="['mayor']"
-      :items-per-page="5"
-      show-group-by=''
-      :items="generateData(item.includedPermissions)"
-      :search='uiCompareViewExpandedSearch'
-    )
-      template(v-slot:item='{ item }')
-        tr
-          td(v-if='uiCompareViewExpandedSearch', v-html='$options.filters.highlight(item.name, uiCompareViewExpandedSearch)')
-          td(v-else='', v-html='$options.filters.highlightRegExp(item.name, activeRoleFilters)')
-          td
+  v-col(cols='12')
+    v-card.overflow-y-auto(
+      dark='',
+      max-width='90vw',
+      max-height='60vh')
+      v-card-text
+        v-data-table(
+          hide-default-header=''
+          :hide-default-footer='item.includedPermissions.length <= 5'
+          :dense='false'
+          :dark='true'
+          :headers="[{text: 'permission name', sortable: true, value: 'name'}]"
+          :items-per-page="5"
+          :items="generateData(item.includedPermissions)"
+          :search='uiCompareViewExpandedSearch'
+        )
+          template(v-slot:item='{ item }')
+            tr
+              td(v-if='uiCompareViewExpandedSearch', v-html='$options.filters.highlight(item.name, uiCompareViewExpandedSearch)')
+              td(v-else='', v-html='$options.filters.highlightRegExp(item.name, activeRoleFilters)')
 </template>
 <script>
 export default {
@@ -41,7 +39,7 @@ export default {
     generateData (arrayData) {
       if (!arrayData) return []
       return arrayData.map(function (item) {
-        return { name: item, value: item, mayor: item.split('.')[0], minor: item.split('.')[1] }
+        return { name: item, value: item }
       }, this)
     }
   },
@@ -58,3 +56,8 @@ export default {
   }
 }
 </script>
+<style scoped>
+.v-data-table >>> .v-data-footer .v-data-footer__pagination {
+  margin: 1px !important;
+}
+</style>

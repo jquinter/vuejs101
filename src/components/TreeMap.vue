@@ -1,5 +1,6 @@
 <template>
   <div class="treemap">
+    <span v-if='debug'>{{debug}}</span>
     <blockquote class="blockquote"> Este gráfico es interactivo: pincha las zonas para ver detalles jerárquicos</blockquote>
     <!-- The SVG structure is explicitly defined in the template with attributes derived from component data -->
     <svg :height="height" style="margin-left: 0px;" :width="width">
@@ -284,6 +285,9 @@ export default {
       this.x.domain([node.x0, node.x0 + (node.x1 - node.x0)])
       this.y.domain([node.y0, node.y0 + (node.y1 - node.y0)])
       return node
+    },
+    debug () {
+      return process.env.NODE_ENV === 'production' ? '' : `(${this.containerWidth}X${this.containerHeight})`
     }
   },
   methods: {
