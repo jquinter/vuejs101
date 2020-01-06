@@ -28,10 +28,14 @@ div
                     strong {{ data.item.label }}
                 span {{data.item.value}}
 
-        v-col(cols='6', md='2', align='center')
+        v-col.d-none.d-md-block(md='2', align='center')
           v-switch.mt-2(v-model='uiIsCompareView', color='lime accent-3', :label='uiButtonSwitchViewText')
-        v-col(cols='6', md='2', align='center')
-          v-switch.mt-2(v-model='lpp',
+        v-col.d-none.d-md-block(md='2', align='center')
+          v-switch.align-center.justify-center.mt-2(v-model='lpp',
+            color='lime accent-3',
+            label='Least Priviledge Principle')
+        v-col.d-block.d-md-none(cols='8', offset='2', md='2', align='center')
+          v-switch.align-center.justify-center.mt-2(v-model='lpp',
             color='lime accent-3',
             label='Least Priviledge Principle')
 

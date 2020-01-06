@@ -28,7 +28,7 @@ div
                     strong {{ data.item.label }}
                 span {{data.item.value}}
 
-        v-col(cols='6', md='5', align='center')
+        v-col.d-none.d-md-block(md='5', align='center')
           v-switch.mt-2(v-model='uiIsCompareView', color='lime accent-3', :label='uiButtonSwitchViewText')
 
     v-container(fluid='')
