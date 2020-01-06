@@ -449,15 +449,23 @@ export default {
       if (this.activeRoleFilters.length > 0) {
         let matchingRoles = new Set()
         let partialMatching = []
+        let filteringRolesQuerySize = this.activeRoleFilters.length /* de todo el fitro, cuantos se usan para buscar permisos */
+        for (let index = 0; index < this.activeRoleFilters.length; index++) {
+          const filteringByItem = this.activeRoleFilters[index].value
+          /* Ampliación de filtro de búsqueda: podemos buscar por calce de codigo de rol */
+          if (filteringByItem.startsWith('roles/')) {
+            filteringRolesQuerySize--
+          }
+        }
         for (let index = 0; index < this.activeRoleFilters.length; index++) {
           /* for each role filter */
 
-          const filteringByRole = this.activeRoleFilters[index].value
+          const filteringByItem = this.activeRoleFilters[index].value
 
           /* Ampliación de filtro de búsqueda: podemos buscar por calce de codigo de rol */
-          if (filteringByRole.startsWith('roles/')) {
+          if (filteringByItem.startsWith('roles/')) {
             partialMatching = this.info.filter(item => {
-              var regexp = new RegExp(filteringByRole, 'gi')
+              var regexp = new RegExp(filteringByItem, 'gi')
               return item && item.name && regexp.test(item.name)
             })
           } else {
@@ -465,12 +473,12 @@ export default {
 
             /*
             Primero: obtener, desde el set completo de roles (info)
-            todos aquellos roles que contienen el permiso que estamos buscando (filteringByRole)
+            todos aquellos roles que contienen el permiso que estamos buscando (filteringByItem)
             */
             partialMatching = this.info.filter(item => {
               // return item.name.toLowerCase().indexOf(filtering_by_role.toByRolee()) > -1
               // console.log(item.name, item.includedPermissions.length, item.includedPermissions.some((element) => (element.toLowerCase().indexOf(filtering_by_role.toByRolee()) > -1)))
-              var regexp = new RegExp(filteringByRole, 'gi')
+              var regexp = new RegExp(filteringByItem, 'gi')
               return item && item.includedPermissions && item.includedPermissions.length &&
                 // item.includedPermissions.some((element) => (element.toLowerCase().indexOf(filtering_by_role.toByRolee()) > -1))
                 item.includedPermissions.some((element) => (regexp.test(element)))
@@ -483,7 +491,7 @@ export default {
             for (let index = 0; index < partialMatching.length; index++) {
               const item = partialMatching[index]
               var currentMatch = item.includedPermissions.filter(perm => {
-                var regexp = new RegExp(filteringByRole, 'gi')
+                var regexp = new RegExp(filteringByItem, 'gi')
                 return regexp.test(perm)
               })
               if (item.name in this.rolesAndMatchingPermissions) {
@@ -506,7 +514,7 @@ export default {
               includedPermissionsSize: item.includedPermissions.length,
               matchingPermissions: item.name in this.rolesAndMatchingPermissions ? this.rolesAndMatchingPermissions[item.name] : null,
               matchingPermissionsSize: item.name in this.rolesAndMatchingPermissions ? this.rolesAndMatchingPermissions[item.name].length : null,
-              missingPermissionsSize: item.name in this.rolesAndMatchingPermissions ? this.filteredPermissions.length - this.rolesAndMatchingPermissions[item.name].length : null
+              missingPermissionsSize: item.name in this.rolesAndMatchingPermissions ? Math.max(filteringRolesQuerySize - this.rolesAndMatchingPermissions[item.name].length, 0) : null
             }
             return processed
           }, this)

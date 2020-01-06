@@ -114,7 +114,7 @@ v-content
                                       | Users who are not owners, including organization admins, must be assigned either the Organization Role Administrator role, or the IAM Role Administrator role.
                                   .text-center
                                     v-btn(v-if='!uiCustomRoleWarning', @click='uiCustomRoleWarning = true', color='warning') ¿Qué necesito para correr este comando?
-                    v-col(cols='12', align='center')
+                    v-col.d-none.d-sm-block(cols='12', align='center')
                       v-btn.ma-2(color='lime accent-3', outlined='', v-on:click='uiSwitchView()')
                         span {{ uiButtonSwitchViewText }}
 
@@ -327,10 +327,6 @@ v-content
                                     | Users who are not owners, including organization admins, must be assigned either the Organization Role Administrator role, or the IAM Role Administrator role.
                                 .text-center
                                   v-btn(v-if='!uiCustomRoleWarning', @click='uiCustomRoleWarning = true', color='warning') ¿Qué necesito para correr este comando?
-
-                  v-col(cols='12', align='center')
-                    v-btn.ma-2(color='lime accent-3', outlined='', v-on:click='uiSwitchView()')
-                      span {{ uiButtonSwitchViewText }}
 
                 v-container(fluid='')
                   transition-group.depth(name='gallery', tag='v-row')
@@ -654,6 +650,15 @@ export default {
       if (this.activeRoleFilters.length > 0) {
         let matchingRoles = new Set()
         let partialMatching = []
+        let filteringRolesQuerySize = this.activeRoleFilters.length /* de todo el fitro, cuantos se usan para buscar permisos */
+        for (let index = 0; index < this.activeRoleFilters.length; index++) {
+          const filteringByItem = this.activeRoleFilters[index].value
+          /* Ampliación de filtro de búsqueda: podemos buscar por calce de codigo de rol */
+          if (filteringByItem.startsWith('roles/')) {
+            filteringRolesQuerySize--
+          }
+        }
+
         for (let index = 0; index < this.activeRoleFilters.length; index++) {
           /* for each role filter */
 
@@ -711,7 +716,7 @@ export default {
               includedPermissionsSize: item.includedPermissions.length,
               matchingPermissions: item.name in this.rolesAndMatchingPermissions ? this.rolesAndMatchingPermissions[item.name] : null,
               matchingPermissionsSize: item.name in this.rolesAndMatchingPermissions ? this.rolesAndMatchingPermissions[item.name].length : null,
-              missingPermissionsSize: item.name in this.rolesAndMatchingPermissions ? this.filteredPermissions.length - this.rolesAndMatchingPermissions[item.name].length : null
+              missingPermissionsSize: item.name in this.rolesAndMatchingPermissions ? Math.max(filteringRolesQuerySize - this.rolesAndMatchingPermissions[item.name].length, 0) : null
             }
             return processed
           }, this)

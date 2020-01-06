@@ -57,22 +57,12 @@ v-app#inspire
 
   router-view
 
-  v-snackbar(v-model='uiSnackbarRoles', left='', top='', vertical='')
-    | Hay
-    span(v-if="info && info.length>filteredRoles.length")
-      | {{filteredRoles.length}}/
-    span(v-if="info && info.length>0")
-      | {{info.length}}
-    | roles
+  v-snackbar(v-model='uiSnackbarRoles', :timeout=15000, vertical='')
+    | {{ rolesSnackbarText }}
     v-btn(icon='', @click='uiSnackbarRoles = false')
       v-icon mdi-window-close
-  v-snackbar(v-model='uiSnackbarPermissions', left='', top='', vertical='')
-    | Hay
-    span(v-if="info && info.length>filteredPermissions.length")
-      | {{filteredPermissions.length}}/
-    span(v-if="permissions && permissions.length>0")
-      | {{permissions.length}}
-    | permisos
+  v-snackbar(v-model='uiSnackbarPermissions', :timeout=15000, vertical='')
+    | {{ permisosSnackbarText }}
     v-btn(icon='', @click='uiSnackbarPermissions = false')
       v-icon mdi-window-close
 </template>
@@ -97,6 +87,62 @@ export default {
   computed: {
     breakpoint () {
       return process.env.NODE_ENV === 'production' ? '' : `${this.$vuetify.breakpoint.name} (${this.$vuetify.breakpoint.width}X${this.$vuetify.breakpoint.height})`
+    },
+    permisosSnackbarText () {
+      if (!this.permissions || this.permissions.length === 0) {
+        return `ERROR: No hay permisos`
+      }
+
+      let msg = ''
+      if (this.filteredPermissions.length > 0 && this.info && this.info.length > this.filteredPermissions.length) {
+        msg = 'En base a parámetros de búsqueda, se '
+        if (this.filteredPermissions.length === 1) {
+          msg += 'encontró '
+        } else {
+          msg += 'encontraron '
+        }
+        msg += `${this.filteredPermissions.length}/`
+      } else {
+        msg = 'Hay '
+      }
+      if (this.permissions && this.permissions.length > 0) {
+        msg += `${this.permissions.length}`
+      }
+      msg += ` permisos`
+
+      if (this.filteredPermissions.length > 0 && this.info && this.info.length > this.filteredPermissions.length) {
+        msg += ` que fueron seleccionados directamente, o bien son incluídos en al menos uno de los roles buscados`
+      }
+
+      return msg
+    },
+    rolesSnackbarText () {
+      if (!this.info || this.info.length === 0) {
+        return `ERROR: No hay roles`
+      }
+
+      let msg = ''
+      if (this.filteredRoles.length > 0 && this.info && this.info.length > this.filteredRoles.length) {
+        msg = 'En base a parámetros de búsqueda, se '
+        if (this.filteredRoles.length === 1) {
+          msg += 'encontró '
+        } else {
+          msg += 'encontraron '
+        }
+        msg += `${this.filteredRoles.length}/`
+      } else {
+        msg = 'Hay '
+      }
+      if (this.info && this.info.length > 0) {
+        msg += `${this.info.length}`
+      }
+      msg += ` roles`
+
+      if (this.filteredRoles.length > 0 && this.info && this.info.length > this.filteredRoles.length) {
+        msg += ` que fueron seleccionados directamente, o bien que contienen al menos uno de los permisos buscados`
+      }
+
+      return msg
     },
     ...mapState([
       'activeRoleFilters',

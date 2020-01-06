@@ -4,18 +4,33 @@ div
     elevation='12',
     :raised='true',
     :ripple='true')
-    v-card-title.word-wrapped {{role.title}}
-    v-card-subtitle {{role.description}}
+    v-card-title.word-wrapped(@click='overlay = !overlay') {{role.title}}
+    v-card-subtitle(@click='overlay = !overlay') {{role.description}}
     v-card-actions
       v-row
+        v-col(v-if='query.length > 0 && role && role.matchingPermissions')
+          v-tooltip(top='', :dark='true')
+            template(v-slot:activator='{ on }')
+              v-btn.mr-1(color='light-green darken-3', v-on='on', @click='uiSnackbarMatches = true')
+                v-icon(v-if='role.missingPermissionsSize > 0', left='') mdi-file-find-outline
+                v-icon(v-else='', left='') mdi-file-find
+                span(v-if='role.matchingPermissions.length > 0') {{role.matchingPermissions.length}}
+                span(v-else='') 0
+                span / {{role.missingPermissionsSize + role.matchingPermissions.length}}
+            span(v-if='role.missingPermissionsSize > 0') Se encontraron {{role.matchingPermissions.length}} permisos de los {{role.missingPermissionsSize + role.matchingPermissions.length}} usados en la búsqueda
+            span(v-else='') Se encontraron <b>todos</b> los permisos usados en la búsqueda
+
+        v-col
+          v-tooltip(top='', :dark='true')
+            template(v-slot:activator='{ on }')
+              v-btn.mr-1(color='primary', v-on='on', @click='uiSnackbarTotal = true')
+                v-icon(left='') mdi-key-plus
+                span(v-if='(role && role.includedPermissions)') {{role.includedPermissions.length}}
+                span(v-else='') 0
+            span Este rol tiene {{role.includedPermissions.length}} permisos
+
         v-col(cols="12")
-          v-btn.mr-1(color='primary', @click='overlay = !overlay')
-            v-icon(left='') mdi-key-plus
-            span(v-if='(role && role.matchingPermissions)') {{role.matchingPermissions.length}}/
-            span(v-if='(role && role.includedPermissions)') {{role.includedPermissions.length}}
-            span(v-else='') 0
-        v-col(cols="12")
-          v-tooltip(right='', :light='true')
+          v-tooltip(bottom='', :light='true')
             template(v-slot:activator='{ on }')
               v-btn(color='primary', @click='goToRoleDetail(role.name)', v-on='on')
                 v-icon(left='') mdi-format-list-bulleted-square
@@ -55,6 +70,15 @@ div
             v-btn.mx-2(fab='', small='', color='primary', @click='overlay = false', v-on='on')
               v-icon mdi-close
           span Cerrar
+
+  v-snackbar(v-model='uiSnackbarMatches', :timeout=15000, vertical='')
+    | {{ matchesSnackbarText }}
+    v-btn(icon='', @click='uiSnackbarMatches = false')
+      v-icon mdi-window-close
+  v-snackbar(v-model='uiSnackbarTotal', :timeout=15000, vertical='')
+    | {{ totalSnackbarText }}
+    v-btn(icon='', @click='uiSnackbarTotal = false')
+      v-icon mdi-window-close
 </template>
 
 <script>
@@ -80,11 +104,24 @@ export default {
         default:
           return '50vw'
       }
+    },
+    matchesSnackbarText () {
+      if (this.role.missingPermissionsSize > 0) {
+        return `Se encontraron ${this.role.matchingPermissions.length} ` +
+          `permisos de los ${this.role.missingPermissionsSize + this.role.matchingPermissions.length} usados en la búsqueda`
+      } else {
+        return `Se encontraron todos los permisos usados en la búsqueda`
+      }
+    },
+    totalSnackbarText () {
+      return `Este rol tiene ${this.role.includedPermissions.length} permisos`
     }
   },
 
   data: () => ({
-    overlay: false
+    overlay: false,
+    uiSnackbarMatches: false,
+    uiSnackbarTotal: false
   }),
 
   methods: {
